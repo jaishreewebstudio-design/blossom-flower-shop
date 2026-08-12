@@ -3,15 +3,16 @@ from flask import (
     jsonify,
     request,
     render_template,
-    send_from_directory,
-    session,
-    redirect
+    redirect,
+    url_for,
+    session
 )
 
 from flask_cors import CORS
-from flasgger import Swagger
+
 import sqlite3
 import os
+import json
 
 from werkzeug.security import (
     generate_password_hash,
@@ -19,127 +20,67 @@ from werkzeug.security import (
 )
 
 
-# =========================================================
+# ============================================================
 # FLASK APP
-# =========================================================
+# ============================================================
 
 app = Flask(__name__)
 
-app.secret_key = "blossom_flower_shop_secret_key_2026"
+app.secret_key = os.environ.get(
+    "SECRET_KEY",
+    "blossom-flower-shop-secret-key"
+)
 
 CORS(app)
 
 
-# =========================================================
-# SWAGGER CONFIGURATION
-# =========================================================
+# ============================================================
+# DATABASE
+# ============================================================
 
-swagger_template = {
-    "swagger": "2.0",
-
-    "info": {
-        "title": "Blossom Flower Shop API",
-        "description": """
-        Complete API documentation for Blossom Flower Shop.
-
-        Features:
-        - User Registration
-        - User Login
-        - Forgot Password
-        - User Session
-        - Flowers
-        - Shopping Cart
-        - Checkout
-        - Orders
-        - Health Check
-        """,
-        "version": "3.0.0"
-    },
-
-    "basePath": "/",
-
-    "schemes": [
-        "http"
-    ],
-
-    "consumes": [
-        "application/json"
-    ],
-
-    "produces": [
-        "application/json"
-    ],
-
-    "tags": [
-        {
-            "name": "Authentication",
-            "description": "Registration, login, logout and user session"
-        },
-        {
-            "name": "Flowers",
-            "description": "Flower APIs"
-        },
-        {
-            "name": "Cart",
-            "description": "Shopping cart APIs"
-        },
-        {
-            "name": "Orders",
-            "description": "Order and checkout APIs"
-        },
-        {
-            "name": "System",
-            "description": "System and health APIs"
-        }
-    ]
-}
-
-swagger = Swagger(
-    app,
-    template=swagger_template
+BASE_DIR = os.path.dirname(
+    os.path.abspath(__file__)
 )
 
-
-# =========================================================
-# DATABASE
-# =========================================================
-
 DATABASE = os.path.join(
-    os.path.dirname(__file__),
+    BASE_DIR,
     "flower_shop.db"
 )
 
 
-# =========================================================
+# ============================================================
 # DATABASE CONNECTION
-# =========================================================
+# ============================================================
 
 def get_db():
 
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(
+        DATABASE
+    )
 
     conn.row_factory = sqlite3.Row
 
-    conn.execute(
-        "PRAGMA foreign_keys = ON"
-    )
+    conn.execute("PRAGMA foreign_keys = ON")
 
     return conn
 
 
-# =========================================================
-# DATABASE INITIALIZATION
-# =========================================================
+# ============================================================
+# INITIALIZE DATABASE
+# ============================================================
 
 def init_db():
 
     conn = get_db()
 
-    # =====================================================
-    # USERS TABLE
-    # =====================================================
+    cursor = conn.cursor()
 
-    conn.execute("""
+
+    # --------------------------------------------------------
+    # USERS
+    # --------------------------------------------------------
+
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
 
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -150,41 +91,42 @@ def init_db():
 
             password TEXT NOT NULL,
 
-            created_at TIMESTAMP
-                DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
         )
     """)
 
-    # =====================================================
-    # FLOWERS TABLE
-    # =====================================================
 
-    conn.execute("""
+    # --------------------------------------------------------
+    # FLOWERS
+    # --------------------------------------------------------
+
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS flowers (
 
             id INTEGER PRIMARY KEY AUTOINCREMENT,
 
             name TEXT NOT NULL,
 
-            category TEXT NOT NULL,
-
-            description TEXT,
-
-            price REAL NOT NULL,
+            price REAL NOT NULL DEFAULT 0,
 
             image TEXT,
 
-            stock INTEGER DEFAULT 10
+            description TEXT,
+
+            stock INTEGER NOT NULL DEFAULT 0,
+
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
         )
     """)
 
-    # =====================================================
-    # CART TABLE
-    # =====================================================
 
-    conn.execute("""
+    # --------------------------------------------------------
+    # CART
+    # --------------------------------------------------------
+
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS cart (
 
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -193,55 +135,29 @@ def init_db():
 
             flower_id INTEGER NOT NULL,
 
-            quantity INTEGER DEFAULT 1,
+            quantity INTEGER NOT NULL DEFAULT 1,
 
-            status TEXT DEFAULT 'In Cart',
+            status TEXT NOT NULL DEFAULT 'Cart',
 
-            created_at TIMESTAMP
-                DEFAULT CURRENT_TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-            UNIQUE(user_id, flower_id)
+            FOREIGN KEY(user_id)
+                REFERENCES users(id)
+                ON DELETE CASCADE,
+
+            FOREIGN KEY(flower_id)
+                REFERENCES flowers(id)
+                ON DELETE CASCADE
 
         )
     """)
 
-    # =====================================================
-    # CHECK CART STATUS COLUMN
-    # =====================================================
 
-    cart_columns = conn.execute(
-        "PRAGMA table_info(cart)"
-    ).fetchall()
+    # --------------------------------------------------------
+    # ORDERS
+    # --------------------------------------------------------
 
-    cart_column_names = [
-        column["name"]
-        for column in cart_columns
-    ]
-
-    if "status" not in cart_column_names:
-
-        conn.execute("""
-            ALTER TABLE cart
-            ADD COLUMN status TEXT
-            DEFAULT 'In Cart'
-        """)
-
-    # =====================================================
-    # FIX NULL STATUS
-    # =====================================================
-
-    conn.execute("""
-        UPDATE cart
-        SET status = 'In Cart'
-        WHERE status IS NULL
-        OR status = ''
-    """)
-
-    # =====================================================
-    # ORDERS TABLE
-    # =====================================================
-
-    conn.execute("""
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS orders (
 
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -256,47 +172,62 @@ def init_db():
 
             payment TEXT NOT NULL,
 
-            total REAL NOT NULL,
+            total REAL NOT NULL DEFAULT 0,
 
-            status TEXT DEFAULT 'Processing',
+            status TEXT NOT NULL DEFAULT 'Processing',
 
-            created_at TIMESTAMP
-                DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY(user_id)
+                REFERENCES users(id)
+                ON DELETE CASCADE
 
         )
     """)
 
-    # =====================================================
-    # ORDER ITEMS TABLE
-    # =====================================================
 
-    conn.execute("""
+    # --------------------------------------------------------
+    # ORDER ITEMS
+    # --------------------------------------------------------
+
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS order_items (
 
             id INTEGER PRIMARY KEY AUTOINCREMENT,
 
             order_id INTEGER NOT NULL,
 
-            flower_id INTEGER NOT NULL,
+            flower_id INTEGER,
 
-            flower_name TEXT NOT NULL,
+            name TEXT NOT NULL,
 
             price REAL NOT NULL,
 
             quantity INTEGER NOT NULL,
 
-            subtotal REAL NOT NULL
+            subtotal REAL NOT NULL,
+
+            FOREIGN KEY(order_id)
+                REFERENCES orders(id)
+                ON DELETE CASCADE
 
         )
     """)
 
-    # =====================================================
-    # DEFAULT FLOWERS
-    # =====================================================
 
-    count = conn.execute(
-        "SELECT COUNT(*) FROM flowers"
-    ).fetchone()[0]
+    conn.commit()
+
+
+    # ========================================================
+    # DEFAULT FLOWERS
+    # ========================================================
+
+    cursor.execute(
+        "SELECT COUNT(*) AS count FROM flowers"
+    )
+
+    count = cursor.fetchone()["count"]
+
 
     if count == 0:
 
@@ -304,354 +235,276 @@ def init_db():
 
             (
                 "Red Rose",
-                "Rose",
-                "Fresh red roses, perfect for love and special occasions.",
-                499,
+                299,
                 "https://images.unsplash.com/photo-1496062031456-07b8f162a322",
-                25
-            ),
-
-            (
-                "White Lily",
-                "Lily",
-                "Beautiful fresh white lilies with an elegant fragrance.",
-                599,
-                "https://images.unsplash.com/photo-1597848212624-e19f1f68c8b6",
-                20
-            ),
-
-            (
-                "Pink Tulip",
-                "Tulip",
-                "Fresh pink tulips that bring beauty and happiness.",
-                449,
-                "https://images.unsplash.com/photo-1520763185298-1b434c919102",
-                30
-            ),
-
-            (
-                "Yellow Sunflower",
-                "Sunflower",
-                "Bright yellow sunflowers to make every day cheerful.",
-                399,
-                "https://images.unsplash.com/photo-1597848212624-e19f1f68c8b6",
-                15
+                "Beautiful red roses",
+                50
             ),
 
             (
                 "Pink Rose",
-                "Rose",
-                "Soft pink roses suitable for gifts and celebrations.",
-                549,
+                349,
                 "https://images.unsplash.com/photo-1518709268805-4e9042af9f23",
-                18
+                "Beautiful pink roses",
+                50
             ),
 
             (
-                "Orange Lily",
-                "Lily",
-                "Beautiful orange lilies with vibrant natural colors.",
-                649,
-                "https://images.unsplash.com/photo-1490750967868-88aa4486c946",
-                12
+                "Sunflower",
+                399,
+                "https://images.unsplash.com/photo-1597848212624-e19e7e5b0c7d",
+                "Bright yellow sunflower",
+                50
+            ),
+
+            (
+                "Tulip",
+                449,
+                "https://images.unsplash.com/photo-1520763185298-1b434c919102",
+                "Beautiful tulip flowers",
+                50
+            ),
+
+            (
+                "White Lily",
+                499,
+                "https://images.unsplash.com/photo-1596438459190-0ff7b1e6b7c0",
+                "Elegant white lilies",
+                50
             )
 
         ]
 
-        conn.executemany("""
+
+        cursor.executemany(
+            """
             INSERT INTO flowers
             (
                 name,
-                category,
-                description,
                 price,
                 image,
+                description,
                 stock
             )
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, flowers)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            flowers
+        )
 
-    conn.commit()
+
+        conn.commit()
+
 
     conn.close()
 
 
-# =========================================================
-# INITIALIZE DATABASE
-# =========================================================
+# ============================================================
+# CURRENT USER
+# ============================================================
 
-init_db()
+def current_user():
+
+    user_id = session.get(
+        "user_id"
+    )
+
+    if not user_id:
+
+        return None
 
 
-# =========================================================
-# FRONTEND PAGE ROUTES
-# =========================================================
+    conn = get_db()
+
+    user = conn.execute(
+        """
+        SELECT
+            id,
+            name,
+            email
+        FROM users
+        WHERE id = ?
+        """,
+        (user_id,)
+    ).fetchone()
+
+    conn.close()
+
+    return user
+
+
+# ============================================================
+# HOME
+# ============================================================
 
 @app.route("/")
-def index():
-    return render_template("register.html")
-
-
-# =========================================================
-# HOME
-# =========================================================
-
-@app.route("/home")
 def home_page():
-    return render_template("home.html")
+
+    return render_template(
+        "register.html"
+    )
 
 
-@app.route("/home.html")
-def home_html():
-    return render_template("home.html")
-
-
-# =========================================================
-# LOGIN
-# =========================================================
-
-@app.route("/login")
-def login_page():
-    return render_template("login.html")
-
-
-@app.route("/login.html")
-def login_html():
-    return render_template("login.html")
-
-
-# =========================================================
-# FORGOT PASSWORD PAGE
-# =========================================================
-
-@app.route("/forgot-password")
-def forgot_password_page():
-    return render_template("forgot-password.html")
-
-
-@app.route("/forgot-password.html")
-def forgot_password_html():
-    return render_template("forgot-password.html")
-
-
-# =========================================================
-# REGISTER
-# =========================================================
+# ============================================================
+# REGISTER PAGE
+# ============================================================
 
 @app.route("/register")
 def register_page():
-    return render_template("register.html")
+
+    return render_template(
+        "register.html"
+    )
 
 
-@app.route("/register.html")
-def register_html():
-    return render_template("register.html")
+# ============================================================
+# LOGIN PAGE
+# ============================================================
+
+@app.route("/login")
+def login_page():
+
+    return render_template(
+        "login.html"
+    )
 
 
-# =========================================================
-# DASHBOARD
-# =========================================================
+# ============================================================
+# FORGOT PASSWORD PAGE
+# ============================================================
+
+@app.route("/forgot-password")
+def forgot_password_page():
+
+    return render_template(
+        "forgot-password.html"
+    )
+
+
+# ============================================================
+# DASHBOARD PAGE
+# ============================================================
 
 @app.route("/dashboard")
 def dashboard_page():
-    return render_template("dashboard.html")
+
+    return render_template(
+        "dashboard.html"
+    )
 
 
-@app.route("/dashboard.html")
-def dashboard_html():
-    return render_template("dashboard.html")
-
-
-# =========================================================
-# FLOWERS
-# =========================================================
-
-@app.route("/flower")
-def flower_page():
-    return render_template("flower.html")
-
-
-@app.route("/flower.html")
-def flower_html():
-    return render_template("flower.html")
-
+# ============================================================
+# FLOWERS PAGE
+# ============================================================
 
 @app.route("/flowers")
 def flowers_page():
-    return render_template("flower.html")
+
+    return render_template(
+        "flowers.html"
+    )
 
 
-# =========================================================
-# CART
-# =========================================================
+# ============================================================
+# CART PAGE
+# ============================================================
 
 @app.route("/cart")
 def cart_page():
-    return render_template("cart.html")
+
+    return render_template(
+        "cart.html"
+    )
 
 
-@app.route("/cart.html")
-def cart_html():
-    return render_template("cart.html")
-
-
-# =========================================================
-# CHECKOUT
-# =========================================================
+# ============================================================
+# CHECKOUT PAGE
+# ============================================================
 
 @app.route("/checkout")
 def checkout_page():
-    return render_template("checkout.html")
+
+    return render_template(
+        "checkout.html"
+    )
 
 
-@app.route("/checkout.html")
-def checkout_html():
-    return render_template("checkout.html")
-
-
-# =========================================================
-# ORDERS
-# =========================================================
+# ============================================================
+# ORDERS PAGE
+# ============================================================
 
 @app.route("/orders")
 def orders_page():
-    return render_template("orders.html")
 
-
-@app.route("/orders.html")
-def orders_html():
-    return render_template("orders.html")
-
-
-# =========================================================
-# ABOUT
-# =========================================================
-
-@app.route("/about")
-def about_page():
-    return render_template("about.html")
-
-
-@app.route("/about.html")
-def about_html():
-    return render_template("about.html")
-
-
-# =========================================================
-# CONTACT
-# =========================================================
-
-@app.route("/contact")
-def contact_page():
-    return render_template("contact.html")
-
-
-@app.route("/contact.html")
-def contact_html():
-    return render_template("contact.html")
-
-
-# =========================================================
-# STYLE.CSS
-# =========================================================
-
-@app.route("/style.css")
-def style_css():
-    return send_from_directory(
-        os.path.dirname(__file__),
-        "style.css"
+    return render_template(
+        "orders.html"
     )
 
 
-# =========================================================
-# JAVASCRIPT FILES
-# =========================================================
-
-@app.route("/js/<path:filename>")
-def javascript_files(filename):
-    return send_from_directory(
-        os.path.join(
-            os.path.dirname(__file__),
-            "js"
-        ),
-        filename
-    )
-
-
-# =========================================================
-# API HOME
-# =========================================================
-
-@app.route("/api", methods=["GET"])
-def home_api():
-    """
-    API Home
-    ---
-    tags:
-      - System
-    responses:
-      200:
-        description: API is running
-    """
-
-    return jsonify({
-        "success": True,
-        "message": "Blossom Flower Shop API is running"
-    })
-
-
-# =========================================================
+# ============================================================
 # REGISTER API
-# =========================================================
+# ============================================================
 
-@app.route("/api/register", methods=["POST"])
-def register():
-    """
-    Register a new user
-    ---
-    tags:
-      - Authentication
-    """
+@app.route(
+    "/api/register",
+    methods=["POST"]
+)
+def register_api():
 
-    data = request.get_json(silent=True)
+    data = request.get_json(
+        silent=True
+    ) or {}
 
-    if not data:
 
-        return jsonify({
-            "success": False,
-            "message": "Request body is required"
-        }), 400
-
-    name = data.get(
-        "name",
-        ""
+    name = str(
+        data.get("name", "")
     ).strip()
 
-    email = data.get(
-        "email",
-        ""
+
+    email = str(
+        data.get("email", "")
     ).strip().lower()
 
-    password = data.get(
-        "password",
-        ""
+
+    password = str(
+        data.get("password", "")
     )
 
-    if not name or not email or not password:
+
+    # --------------------------------------------------------
+    # VALIDATION
+    # --------------------------------------------------------
+
+    if not name:
 
         return jsonify({
             "success": False,
-            "message": "Name, email and password are required"
+            "message": "Name is required."
         }), 400
+
+
+    if not email:
+
+        return jsonify({
+            "success": False,
+            "message": "Email is required."
+        }), 400
+
 
     if len(password) < 6:
 
         return jsonify({
             "success": False,
-            "message": "Password must be at least 6 characters"
+            "message":
+                "Password must be at least 6 characters."
         }), 400
 
+
     conn = get_db()
+
+
+    # --------------------------------------------------------
+    # CHECK EMAIL
+    # --------------------------------------------------------
 
     existing = conn.execute(
         """
@@ -662,16 +515,30 @@ def register():
         (email,)
     ).fetchone()
 
+
     if existing:
 
         conn.close()
 
         return jsonify({
             "success": False,
-            "message": "Email already registered. Please login."
+            "message":
+                "Email already registered."
         }), 409
 
-    hashed_password = generate_password_hash(password)
+
+    # --------------------------------------------------------
+    # HASH PASSWORD
+    # --------------------------------------------------------
+
+    hashed_password = generate_password_hash(
+        password
+    )
+
+
+    # --------------------------------------------------------
+    # INSERT USER
+    # --------------------------------------------------------
 
     cursor = conn.execute(
         """
@@ -690,18 +557,22 @@ def register():
         )
     )
 
-    user_id = cursor.lastrowid
 
     conn.commit()
 
+
+    user_id = cursor.lastrowid
+
+
     conn.close()
+
 
     return jsonify({
 
         "success": True,
 
         "message":
-            "Registration successful. You can now login.",
+            "Registration successful.",
 
         "user": {
 
@@ -716,46 +587,42 @@ def register():
     }), 201
 
 
-# =========================================================
+# ============================================================
 # LOGIN API
-# =========================================================
+# ============================================================
 
-@app.route("/api/login", methods=["POST"])
-def login():
-    """
-    Login user
-    ---
-    tags:
-      - Authentication
-    """
+@app.route(
+    "/api/login",
+    methods=["POST"]
+)
+def login_api():
 
-    data = request.get_json(silent=True)
+    data = request.get_json(
+        silent=True
+    ) or {}
 
-    if not data:
 
-        return jsonify({
-            "success": False,
-            "message": "Request body is required"
-        }), 400
-
-    email = data.get(
-        "email",
-        ""
+    email = str(
+        data.get("email", "")
     ).strip().lower()
 
-    password = data.get(
-        "password",
-        ""
+
+    password = str(
+        data.get("password", "")
     )
+
 
     if not email or not password:
 
         return jsonify({
             "success": False,
-            "message": "Email and password are required"
+            "message":
+                "Email and password are required."
         }), 400
 
+
     conn = get_db()
+
 
     user = conn.execute(
         """
@@ -766,20 +633,18 @@ def login():
         (email,)
     ).fetchone()
 
+
     conn.close()
+
 
     if not user:
 
         return jsonify({
-
             "success": False,
-
-            "registered": False,
-
             "message":
-                "Please register first. This email is not registered."
+                "Invalid email or password."
+        }), 401
 
-        }), 404
 
     if not check_password_hash(
         user["password"],
@@ -787,15 +652,15 @@ def login():
     ):
 
         return jsonify({
-
             "success": False,
-
-            "registered": True,
-
             "message":
-                "Incorrect password. Please try again."
-
+                "Invalid email or password."
         }), 401
+
+
+    # --------------------------------------------------------
+    # SESSION
+    # --------------------------------------------------------
 
     session["user_id"] = user["id"]
 
@@ -803,14 +668,13 @@ def login():
 
     session["user_email"] = user["email"]
 
+
     return jsonify({
 
         "success": True,
 
-        "registered": True,
-
         "message":
-            "Login successful",
+            "Login successful.",
 
         "user": {
 
@@ -825,282 +689,197 @@ def login():
     })
 
 
-# =========================================================
-# GET CURRENT USER
-# =========================================================
-
-@app.route("/api/me", methods=["GET"])
-def get_current_user():
-    """
-    Get currently logged-in user
-    ---
-    tags:
-      - Authentication
-    """
-
-    user_id = session.get("user_id")
-
-    if not user_id:
-
-        return jsonify({
-
-            "success": False,
-
-            "logged_in": False,
-
-            "message":
-                "User is not logged in"
-
-        }), 401
-
-    return jsonify({
-
-        "success": True,
-
-        "logged_in": True,
-
-        "user": {
-
-            "id":
-                session.get("user_id"),
-
-            "name":
-                session.get("user_name"),
-
-            "email":
-                session.get("user_email")
-
-        }
-
-    })
-
-
-# =========================================================
-# LOGOUT PAGE
-# =========================================================
-
-@app.route("/logout", methods=["GET"])
-def logout_page():
-
-    session.clear()
-
-    return redirect("/login")
-
-
-# =========================================================
+# ============================================================
 # LOGOUT API
-# =========================================================
+# ============================================================
 
-@app.route("/api/logout", methods=["GET", "POST"])
-def logout():
+@app.route(
+    "/api/logout",
+    methods=["POST"]
+)
+def logout_api():
 
     session.clear()
 
-    if request.method == "GET":
-
-        return redirect("/login")
 
     return jsonify({
 
         "success": True,
 
         "message":
-            "Logout successful",
+            "Logout successful."
 
-        "redirect":
-            "/login"
-
-    }), 200
+    })
 
 
-# =========================================================
-# FORGOT PASSWORD API
-# =========================================================
+# ============================================================
+# CURRENT USER API
+# ============================================================
 
-@app.route("/api/forgot-password", methods=["POST"])
-def forgot_password():
-    """
-    Reset user password
-    ---
-    tags:
-      - Authentication
-    """
+@app.route(
+    "/api/me",
+    methods=["GET"]
+)
+def me_api():
 
-    try:
+    user = current_user()
 
-        data = request.get_json(
-            silent=True
-        )
 
-        if not data:
-
-            return jsonify({
-
-                "success": False,
-
-                "message":
-                    "Request body is required"
-
-            }), 400
-
-        email = str(
-            data.get(
-                "email",
-                ""
-            )
-        ).strip().lower()
-
-        new_password = str(
-            data.get(
-                "new_password",
-                ""
-            )
-        )
-
-        confirm_password = str(
-            data.get(
-                "confirm_password",
-                ""
-            )
-        )
-
-        if not email:
-
-            return jsonify({
-
-                "success": False,
-
-                "message":
-                    "Email is required"
-
-            }), 400
-
-        if not new_password:
-
-            return jsonify({
-
-                "success": False,
-
-                "message":
-                    "New password is required"
-
-            }), 400
-
-        if not confirm_password:
-
-            return jsonify({
-
-                "success": False,
-
-                "message":
-                    "Please confirm your new password"
-
-            }), 400
-
-        if len(new_password) < 6:
-
-            return jsonify({
-
-                "success": False,
-
-                "message":
-                    "Password must be at least 6 characters"
-
-            }), 400
-
-        if new_password != confirm_password:
-
-            return jsonify({
-
-                "success": False,
-
-                "message":
-                    "Passwords do not match"
-
-            }), 400
-
-        conn = get_db()
-
-        user = conn.execute(
-            """
-            SELECT
-                id,
-                name,
-                email
-            FROM users
-            WHERE LOWER(TRIM(email)) = ?
-            LIMIT 1
-            """,
-            (email,)
-        ).fetchone()
-
-        if user is None:
-
-            conn.close()
-
-            return jsonify({
-
-                "success": False,
-
-                "message":
-                    "This email is not registered. Please register first."
-
-            }), 404
-
-        hashed_password = generate_password_hash(
-            new_password
-        )
-
-        conn.execute(
-            """
-            UPDATE users
-            SET password = ?
-            WHERE id = ?
-            """,
-            (
-                hashed_password,
-                user["id"]
-            )
-        )
-
-        conn.commit()
-
-        conn.close()
-
-        return jsonify({
-
-            "success": True,
-
-            "message":
-                "Password reset successful. Please login with your new password."
-
-        }), 200
-
-    except Exception as error:
-
-        print(
-            "Forgot Password Error:",
-            error
-        )
+    if not user:
 
         return jsonify({
 
             "success": False,
 
             "message":
-                "Something went wrong while resetting your password."
+                "Not logged in."
 
-        }), 500
+        }), 401
 
 
-# =========================================================
-# GET ALL FLOWERS
-# =========================================================
+    return jsonify({
 
-@app.route("/api/flowers", methods=["GET"])
+        "success": True,
+
+        "user": {
+
+            "id": user["id"],
+
+            "name": user["name"],
+
+            "email": user["email"]
+
+        }
+
+    })
+
+
+# ============================================================
+# FORGOT PASSWORD API
+# ============================================================
+
+@app.route(
+    "/api/forgot-password",
+    methods=["POST"]
+)
+def forgot_password_api():
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+
+    email = str(
+        data.get("email", "")
+    ).strip().lower()
+
+
+    new_password = str(
+        data.get("new_password", "")
+    )
+
+
+    confirm_password = str(
+        data.get("confirm_password", "")
+    )
+
+
+    if not email:
+
+        return jsonify({
+            "success": False,
+            "message":
+                "Please enter your email."
+        }), 400
+
+
+    if len(new_password) < 6:
+
+        return jsonify({
+            "success": False,
+            "message":
+                "Password must be at least 6 characters."
+        }), 400
+
+
+    if new_password != confirm_password:
+
+        return jsonify({
+            "success": False,
+            "message":
+                "Passwords do not match."
+        }), 400
+
+
+    conn = get_db()
+
+
+    user = conn.execute(
+        """
+        SELECT id
+        FROM users
+        WHERE email = ?
+        """,
+        (email,)
+    ).fetchone()
+
+
+    if not user:
+
+        conn.close()
+
+        return jsonify({
+            "success": False,
+            "message":
+                "No account found with this email."
+        }), 404
+
+
+    hashed_password = generate_password_hash(
+        new_password
+    )
+
+
+    conn.execute(
+        """
+        UPDATE users
+        SET password = ?
+        WHERE id = ?
+        """,
+        (
+            hashed_password,
+            user["id"]
+        )
+    )
+
+
+    conn.commit()
+
+    conn.close()
+
+
+    return jsonify({
+
+        "success": True,
+
+        "message":
+            "Password reset successfully."
+
+    })
+
+
+# ============================================================
+# GET FLOWERS
+# ============================================================
+
+@app.route(
+    "/api/flowers",
+    methods=["GET"]
+)
 def get_flowers():
 
     conn = get_db()
+
 
     flowers = conn.execute(
         """
@@ -1110,141 +889,74 @@ def get_flowers():
         """
     ).fetchall()
 
+
     conn.close()
 
-    flower_list = []
+
+    result = []
+
 
     for flower in flowers:
 
-        flower_list.append({
+        result.append({
 
-            "id":
-                flower["id"],
+            "id": flower["id"],
 
-            "name":
-                flower["name"],
+            "name": flower["name"],
 
-            "category":
-                flower["category"],
+            "price": flower["price"],
+
+            "image": flower["image"],
 
             "description":
                 flower["description"],
 
-            "price":
-                flower["price"],
-
-            "image":
-                flower["image"],
-
-            "stock":
-                flower["stock"]
+            "stock": flower["stock"]
 
         })
 
-    return jsonify({
-
-        "success": True,
-
-        "message":
-            "Flowers fetched successfully",
-
-        "flowers":
-            flower_list
-
-    })
-
-
-# =========================================================
-# GET SINGLE FLOWER
-# =========================================================
-
-@app.route("/api/flowers/<int:flower_id>", methods=["GET"])
-def get_flower(flower_id):
-
-    conn = get_db()
-
-    flower = conn.execute(
-        """
-        SELECT *
-        FROM flowers
-        WHERE id = ?
-        """,
-        (flower_id,)
-    ).fetchone()
-
-    conn.close()
-
-    if flower is None:
-
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                "Flower not found"
-
-        }), 404
 
     return jsonify({
 
         "success": True,
 
-        "flower": {
-
-            "id":
-                flower["id"],
-
-            "name":
-                flower["name"],
-
-            "category":
-                flower["category"],
-
-            "description":
-                flower["description"],
-
-            "price":
-                flower["price"],
-
-            "image":
-                flower["image"],
-
-            "stock":
-                flower["stock"]
-
-        }
+        "flowers": result
 
     })
 
 
-# =========================================================
+# ============================================================
 # ADD TO CART
-# =========================================================
+# ============================================================
 
-@app.route("/api/cart", methods=["POST"])
+@app.route(
+    "/api/cart",
+    methods=["POST"]
+)
 def add_to_cart():
 
-    data = request.get_json(silent=True)
+    data = request.get_json(
+        silent=True
+    ) or {}
 
-    if not data:
 
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                "Request body is required"
-
-        }), 400
-
-    user_id = data.get("user_id")
-
-    flower_id = data.get("flower_id")
-
-    quantity = data.get(
-        "quantity",
-        1
+    user_id = data.get(
+        "user_id"
     )
+
+
+    flower_id = data.get(
+        "flower_id"
+    )
+
+
+    quantity = int(
+        data.get(
+            "quantity",
+            1
+        )
+    )
+
 
     if not user_id or not flower_id:
 
@@ -1253,59 +965,18 @@ def add_to_cart():
             "success": False,
 
             "message":
-                "user_id and flower_id are required"
+                "User ID and flower ID are required."
 
         }), 400
 
-    try:
-
-        quantity = int(quantity)
-
-    except (TypeError, ValueError):
-
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                "Quantity must be a number"
-
-        }), 400
 
     if quantity < 1:
 
-        return jsonify({
+        quantity = 1
 
-            "success": False,
-
-            "message":
-                "Quantity must be at least 1"
-
-        }), 400
 
     conn = get_db()
 
-    user = conn.execute(
-        """
-        SELECT id
-        FROM users
-        WHERE id = ?
-        """,
-        (user_id,)
-    ).fetchone()
-
-    if not user:
-
-        conn.close()
-
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                "User not found"
-
-        }), 404
 
     flower = conn.execute(
         """
@@ -1315,6 +986,7 @@ def add_to_cart():
         """,
         (flower_id,)
     ).fetchone()
+
 
     if not flower:
 
@@ -1325,22 +997,10 @@ def add_to_cart():
             "success": False,
 
             "message":
-                "Flower not found"
+                "Flower not found."
 
         }), 404
 
-    if flower["stock"] < quantity:
-
-        conn.close()
-
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                "Not enough stock available"
-
-        }), 400
 
     existing = conn.execute(
         """
@@ -1348,6 +1008,7 @@ def add_to_cart():
         FROM cart
         WHERE user_id = ?
         AND flower_id = ?
+        AND status = 'Cart'
         """,
         (
             user_id,
@@ -1355,54 +1016,20 @@ def add_to_cart():
         )
     ).fetchone()
 
+
     if existing:
 
-        if existing["status"] == "Ordered":
-
-            conn.execute(
-                """
-                UPDATE cart
-                SET quantity = ?,
-                    status = 'In Cart'
-                WHERE id = ?
-                """,
-                (
-                    quantity,
-                    existing["id"]
-                )
+        conn.execute(
+            """
+            UPDATE cart
+            SET quantity = quantity + ?
+            WHERE id = ?
+            """,
+            (
+                quantity,
+                existing["id"]
             )
-
-        else:
-
-            new_quantity = (
-                existing["quantity"]
-                + quantity
-            )
-
-            if new_quantity > flower["stock"]:
-
-                conn.close()
-
-                return jsonify({
-
-                    "success": False,
-
-                    "message":
-                        "Requested quantity exceeds available stock"
-
-                }), 400
-
-            conn.execute(
-                """
-                UPDATE cart
-                SET quantity = ?
-                WHERE id = ?
-                """,
-                (
-                    new_quantity,
-                    existing["id"]
-                )
-            )
+        )
 
     else:
 
@@ -1415,7 +1042,7 @@ def add_to_cart():
                 quantity,
                 status
             )
-            VALUES (?, ?, ?, 'In Cart')
+            VALUES (?, ?, ?, 'Cart')
             """,
             (
                 user_id,
@@ -1424,30 +1051,36 @@ def add_to_cart():
             )
         )
 
+
     conn.commit()
 
     conn.close()
+
 
     return jsonify({
 
         "success": True,
 
         "message":
-            "Flower added to cart"
+            "Flower added to cart."
 
-    }), 200
+    })
 
 
-# =========================================================
-# GET USER CART
-# =========================================================
+# ============================================================
+# GET CART
+# ============================================================
 
-@app.route("/api/cart/<int:user_id>", methods=["GET"])
+@app.route(
+    "/api/cart/<int:user_id>",
+    methods=["GET"]
+)
 def get_cart(user_id):
 
     conn = get_db()
 
-    items = conn.execute(
+
+    rows = conn.execute(
         """
         SELECT
 
@@ -1461,20 +1094,23 @@ def get_cart(user_id):
 
             cart.status,
 
-            cart.created_at,
-
             flowers.name,
 
             flowers.price,
 
             flowers.image,
 
-            flowers.stock
+            flowers.description,
+
+            (
+                flowers.price *
+                cart.quantity
+            ) AS subtotal
 
         FROM cart
 
-        JOIN flowers
-            ON cart.flower_id = flowers.id
+        INNER JOIN flowers
+            ON flowers.id = cart.flower_id
 
         WHERE cart.user_id = ?
 
@@ -1483,167 +1119,100 @@ def get_cart(user_id):
         (user_id,)
     ).fetchall()
 
+
     conn.close()
+
 
     cart = []
 
-    total = 0
 
-    active_count = 0
-
-    ordered_count = 0
-
-    for item in items:
-
-        subtotal = (
-            item["price"]
-            * item["quantity"]
-        )
-
-        status = (
-            item["status"]
-            or "In Cart"
-        )
-
-        if status != "Ordered":
-
-            total += subtotal
-
-            active_count += 1
-
-        else:
-
-            ordered_count += 1
+    for row in rows:
 
         cart.append({
 
-            "id":
-                item["id"],
+            "id": row["id"],
 
             "user_id":
-                item["user_id"],
+                row["user_id"],
 
             "flower_id":
-                item["flower_id"],
+                row["flower_id"],
 
             "name":
-                item["name"],
+                row["name"],
 
             "price":
-                item["price"],
-
-            "quantity":
-                item["quantity"],
-
-            "subtotal":
-                subtotal,
+                row["price"],
 
             "image":
-                item["image"],
+                row["image"],
 
-            "stock":
-                item["stock"],
+            "description":
+                row["description"],
+
+            "quantity":
+                row["quantity"],
 
             "status":
-                status,
+                row["status"],
 
-            "created_at":
-                item["created_at"],
-
-            "can_checkout":
-                status != "Ordered"
+            "subtotal":
+                row["subtotal"]
 
         })
+
 
     return jsonify({
 
         "success": True,
 
-        "cart":
-            cart,
+        "cart": cart
 
-        "total":
-            total,
-
-        "active_count":
-            active_count,
-
-        "ordered_count":
-            ordered_count,
-
-        "count":
-            len(cart)
-
-    }), 200
+    })
 
 
-# =========================================================
-# UPDATE CART QUANTITY
-# =========================================================
+# ============================================================
+# UPDATE CART
+# ============================================================
 
-@app.route("/api/cart/<int:cart_id>", methods=["PUT"])
-def update_cart_quantity(cart_id):
+@app.route(
+    "/api/cart/<int:cart_id>",
+    methods=["PUT"]
+)
+def update_cart(cart_id):
 
-    data = request.get_json(silent=True)
+    data = request.get_json(
+        silent=True
+    ) or {}
 
-    if not data:
 
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                "Request body is required"
-
-        }), 400
-
-    try:
-
-        quantity = int(
-            data.get("quantity")
+    quantity = int(
+        data.get(
+            "quantity",
+            1
         )
+    )
 
-    except (TypeError, ValueError):
-
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                "Quantity must be a number"
-
-        }), 400
 
     if quantity < 1:
 
-        return jsonify({
+        quantity = 1
 
-            "success": False,
-
-            "message":
-                "Quantity must be at least 1"
-
-        }), 400
 
     conn = get_db()
 
-    item = conn.execute(
+
+    row = conn.execute(
         """
-        SELECT
-            cart.*,
-            flowers.stock,
-            flowers.name
+        SELECT *
         FROM cart
-
-        JOIN flowers
-            ON cart.flower_id = flowers.id
-
-        WHERE cart.id = ?
+        WHERE id = ?
         """,
         (cart_id,)
     ).fetchone()
 
-    if not item:
+
+    if not row:
 
         conn.close()
 
@@ -1652,35 +1221,10 @@ def update_cart_quantity(cart_id):
             "success": False,
 
             "message":
-                "Cart item not found"
+                "Cart item not found."
 
         }), 404
 
-    if item["status"] == "Ordered":
-
-        conn.close()
-
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                "Ordered item cannot be changed"
-
-        }), 400
-
-    if quantity > item["stock"]:
-
-        conn.close()
-
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                f"Only {item['stock']} items available"
-
-        }), 400
 
     conn.execute(
         """
@@ -1694,39 +1238,46 @@ def update_cart_quantity(cart_id):
         )
     )
 
+
     conn.commit()
 
     conn.close()
+
 
     return jsonify({
 
         "success": True,
 
         "message":
-            "Cart quantity updated"
+            "Cart updated."
 
     })
 
 
-# =========================================================
-# DELETE SINGLE CART ITEM
-# =========================================================
+# ============================================================
+# DELETE CART ITEM
+# ============================================================
 
-@app.route("/api/cart/<int:cart_id>", methods=["DELETE"])
-def remove_cart_item(cart_id):
+@app.route(
+    "/api/cart/<int:cart_id>",
+    methods=["DELETE"]
+)
+def delete_cart(cart_id):
 
     conn = get_db()
 
-    item = conn.execute(
+
+    row = conn.execute(
         """
-        SELECT *
+        SELECT id
         FROM cart
         WHERE id = ?
         """,
         (cart_id,)
     ).fetchone()
 
-    if item is None:
+
+    if not row:
 
         conn.close()
 
@@ -1735,9 +1286,10 @@ def remove_cart_item(cart_id):
             "success": False,
 
             "message":
-                "Cart item not found"
+                "Cart item not found."
 
         }), 404
+
 
     conn.execute(
         """
@@ -1747,196 +1299,175 @@ def remove_cart_item(cart_id):
         (cart_id,)
     )
 
+
     conn.commit()
 
     conn.close()
+
 
     return jsonify({
 
         "success": True,
 
         "message":
-            "Flower removed from cart"
+            "Cart item removed."
 
     })
 
 
-# =========================================================
-# CLEAR USER CART
-# =========================================================
+# ============================================================
+# CREATE ORDER
+# ============================================================
 
 @app.route(
-    "/api/cart/user/<int:user_id>",
-    methods=["DELETE"]
+    "/api/orders",
+    methods=["POST"]
 )
-def clear_user_cart(user_id):
-
-    conn = get_db()
-
-    conn.execute(
-        """
-        DELETE FROM cart
-        WHERE user_id = ?
-        """,
-        (user_id,)
-    )
-
-    conn.commit()
-
-    conn.close()
-
-    return jsonify({
-
-        "success": True,
-
-        "message":
-            "Cart cleared successfully"
-
-    })
-
-
-# =========================================================
-# CREATE ORDER / CHECKOUT
-# =========================================================
-
-@app.route("/api/orders", methods=["POST"])
 def create_order():
 
-    data = request.get_json(silent=True)
+    data = request.get_json(
+        silent=True
+    ) or {}
 
-    if not data:
 
-        return jsonify({
+    user_id = data.get(
+        "user_id"
+    )
 
-            "success": False,
 
-            "message":
-                "Request body is required"
-
-        }), 400
-
-    user_id = data.get("user_id")
-
-    customer_name = data.get(
-        "customer_name",
-        ""
+    customer_name = str(
+        data.get(
+            "customer_name",
+            ""
+        )
     ).strip()
 
-    phone = data.get(
-        "phone",
-        ""
+
+    phone = str(
+        data.get(
+            "phone",
+            ""
+        )
     ).strip()
 
-    address = data.get(
-        "address",
-        ""
+
+    address = str(
+        data.get(
+            "address",
+            ""
+        )
     ).strip()
 
-    payment = data.get(
-        "payment",
-        ""
+
+    payment = str(
+        data.get(
+            "payment",
+            ""
+        )
     ).strip()
+
 
     cart_ids = data.get(
         "cart_ids",
         []
     )
 
-    if (
-        not user_id
-        or not customer_name
-        or not phone
-        or not address
-        or not payment
-    ):
+
+    # --------------------------------------------------------
+    # VALIDATION
+    # --------------------------------------------------------
+
+    if not user_id:
 
         return jsonify({
 
             "success": False,
 
             "message":
-                "All customer details are required"
+                "User ID is required."
 
         }), 400
+
+
+    if not customer_name:
+
+        return jsonify({
+
+            "success": False,
+
+            "message":
+                "Customer name is required."
+
+        }), 400
+
+
+    if not phone:
+
+        return jsonify({
+
+            "success": False,
+
+            "message":
+                "Phone number is required."
+
+        }), 400
+
+
+    if not address:
+
+        return jsonify({
+
+            "success": False,
+
+            "message":
+                "Delivery address is required."
+
+        }), 400
+
+
+    if not payment:
+
+        return jsonify({
+
+            "success": False,
+
+            "message":
+                "Payment method is required."
+
+        }), 400
+
 
     if not isinstance(
         cart_ids,
         list
-    ):
+    ) or len(cart_ids) == 0:
 
         return jsonify({
 
             "success": False,
 
             "message":
-                "cart_ids must be a list"
+                "Please select at least one cart item."
 
         }), 400
 
-    if len(cart_ids) == 0:
-
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                "Please select at least one flower"
-
-        }), 400
-
-    try:
-
-        cart_ids = [
-            int(cart_id)
-            for cart_id in cart_ids
-        ]
-
-    except (
-        TypeError,
-        ValueError
-    ):
-
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                "Invalid cart item ID"
-
-        }), 400
 
     conn = get_db()
 
-    user = conn.execute(
-        """
-        SELECT id
-        FROM users
-        WHERE id = ?
-        """,
-        (user_id,)
-    ).fetchone()
 
-    if not user:
-
-        conn.close()
-
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                "User not found"
-
-        }), 404
+    # --------------------------------------------------------
+    # GET SELECTED CART ITEMS
+    # --------------------------------------------------------
 
     placeholders = ",".join(
         ["?"] * len(cart_ids)
     )
 
+
     query = f"""
         SELECT
 
-            cart.id AS cart_id,
+            cart.id,
 
             cart.user_id,
 
@@ -1950,32 +1481,32 @@ def create_order():
 
             flowers.price,
 
-            flowers.stock
+            flowers.image
 
         FROM cart
 
-        JOIN flowers
-            ON cart.flower_id = flowers.id
+        INNER JOIN flowers
+            ON flowers.id = cart.flower_id
 
         WHERE cart.user_id = ?
 
         AND cart.id IN ({placeholders})
 
-        AND cart.status != 'Ordered'
-
-        ORDER BY cart.id ASC
     """
+
 
     params = [
         user_id
     ] + cart_ids
 
-    cart_items = conn.execute(
+
+    items = conn.execute(
         query,
         params
     ).fetchall()
 
-    if not cart_items:
+
+    if not items:
 
         conn.close()
 
@@ -1984,61 +1515,30 @@ def create_order():
             "success": False,
 
             "message":
-                "Selected cart items are not available for checkout"
+                "Selected cart items not found."
 
-        }), 400
+        }), 404
 
-    found_ids = {
-        item["cart_id"]
-        for item in cart_items
-    }
 
-    missing_ids = [
-
-        cart_id
-
-        for cart_id in cart_ids
-
-        if cart_id not in found_ids
-
-    ]
-
-    if missing_ids:
-
-        conn.close()
-
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                "One or more selected items are already ordered or unavailable"
-
-        }), 400
-
-    for item in cart_items:
-
-        if item["quantity"] > item["stock"]:
-
-            conn.close()
-
-            return jsonify({
-
-                "success": False,
-
-                "message":
-                    f"Not enough stock for {item['name']}"
-
-            }), 400
+    # --------------------------------------------------------
+    # CALCULATE TOTAL
+    # --------------------------------------------------------
 
     total = 0
 
-    for item in cart_items:
+
+    for item in items:
 
         total += (
-            item["price"]
-            * item["quantity"]
+            float(item["price"])
+            *
+            int(item["quantity"])
         )
+
+
+    # --------------------------------------------------------
+    # CREATE ORDER
+    # --------------------------------------------------------
 
     cursor = conn.execute(
         """
@@ -2052,7 +1552,7 @@ def create_order():
             total,
             status
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, 'Processing')
         """,
         (
             user_id,
@@ -2060,19 +1560,34 @@ def create_order():
             phone,
             address,
             payment,
-            total,
-            "Processing"
+            total
         )
     )
 
+
     order_id = cursor.lastrowid
 
-    for item in cart_items:
+
+    # --------------------------------------------------------
+    # CREATE ORDER ITEMS
+    # --------------------------------------------------------
+
+    for item in items:
+
+        price = float(
+            item["price"]
+        )
+
+
+        quantity = int(
+            item["quantity"]
+        )
+
 
         subtotal = (
-            item["price"]
-            * item["quantity"]
+            price * quantity
         )
+
 
         conn.execute(
             """
@@ -2080,7 +1595,7 @@ def create_order():
             (
                 order_id,
                 flower_id,
-                flower_name,
+                name,
                 price,
                 quantity,
                 subtotal
@@ -2091,38 +1606,35 @@ def create_order():
                 order_id,
                 item["flower_id"],
                 item["name"],
-                item["price"],
-                item["quantity"],
+                price,
+                quantity,
                 subtotal
             )
         )
 
-        conn.execute(
-            """
-            UPDATE flowers
-            SET stock = stock - ?
-            WHERE id = ?
-            """,
-            (
-                item["quantity"],
-                item["flower_id"]
-            )
-        )
+
+        # ----------------------------------------------------
+        # IMPORTANT:
+        # Keep item inside cart.
+        # Just mark it Ordered.
+        # ----------------------------------------------------
 
         conn.execute(
             """
             UPDATE cart
             SET status = 'Ordered'
             WHERE id = ?
-            AND user_id = ?
             """,
-            (
-                item["cart_id"],
-                user_id
-            )
+            (item["id"],)
         )
 
+
     conn.commit()
+
+
+    # --------------------------------------------------------
+    # GET CREATED ORDER
+    # --------------------------------------------------------
 
     order = conn.execute(
         """
@@ -2133,14 +1645,16 @@ def create_order():
         (order_id,)
     ).fetchone()
 
+
     conn.close()
+
 
     return jsonify({
 
         "success": True,
 
         "message":
-            "Order placed successfully",
+            "Order placed successfully.",
 
         "order": {
 
@@ -2176,36 +1690,18 @@ def create_order():
     }), 201
 
 
-# =========================================================
+# ============================================================
 # GET USER ORDERS
-# =========================================================
+# ============================================================
 
-@app.route("/api/orders/<int:user_id>", methods=["GET"])
-def get_user_orders(user_id):
+@app.route(
+    "/api/orders/<int:user_id>",
+    methods=["GET"]
+)
+def get_orders(user_id):
 
     conn = get_db()
 
-    user = conn.execute(
-        """
-        SELECT id
-        FROM users
-        WHERE id = ?
-        """,
-        (user_id,)
-    ).fetchone()
-
-    if not user:
-
-        conn.close()
-
-        return jsonify({
-
-            "success": False,
-
-            "message":
-                "User not found"
-
-        }), 404
 
     orders = conn.execute(
         """
@@ -2217,13 +1713,22 @@ def get_user_orders(user_id):
         (user_id,)
     ).fetchall()
 
+
     result = []
+
 
     for order in orders:
 
         items = conn.execute(
             """
-            SELECT *
+            SELECT
+                id,
+                order_id,
+                flower_id,
+                name,
+                price,
+                quantity,
+                subtotal
             FROM order_items
             WHERE order_id = ?
             ORDER BY id ASC
@@ -2231,20 +1736,25 @@ def get_user_orders(user_id):
             (order["id"],)
         ).fetchall()
 
-        item_list = []
+
+        products = []
+
 
         for item in items:
 
-            item_list.append({
+            products.append({
 
                 "id":
                     item["id"],
+
+                "order_id":
+                    item["order_id"],
 
                 "flower_id":
                     item["flower_id"],
 
                 "name":
-                    item["flower_name"],
+                    item["name"],
 
                 "price":
                     item["price"],
@@ -2256,6 +1766,7 @@ def get_user_orders(user_id):
                     item["subtotal"]
 
             })
+
 
         result.append({
 
@@ -2287,18 +1798,17 @@ def get_user_orders(user_id):
                 order["created_at"],
 
             "items":
-                item_list
+                products
 
         })
 
+
     conn.close()
+
 
     return jsonify({
 
         "success": True,
-
-        "count":
-            len(result),
 
         "orders":
             result
@@ -2306,115 +1816,9 @@ def get_user_orders(user_id):
     })
 
 
-# =========================================================
-# GET ALL ORDERS
-# =========================================================
-
-@app.route("/api/orders", methods=["GET"])
-def get_all_orders():
-
-    conn = get_db()
-
-    orders = conn.execute(
-        """
-        SELECT *
-        FROM orders
-        ORDER BY id DESC
-        """
-    ).fetchall()
-
-    result = []
-
-    for order in orders:
-
-        items = conn.execute(
-            """
-            SELECT *
-            FROM order_items
-            WHERE order_id = ?
-            ORDER BY id ASC
-            """,
-            (order["id"],)
-        ).fetchall()
-
-        item_list = []
-
-        for item in items:
-
-            item_list.append({
-
-                "id":
-                    item["id"],
-
-                "flower_id":
-                    item["flower_id"],
-
-                "name":
-                    item["flower_name"],
-
-                "price":
-                    item["price"],
-
-                "quantity":
-                    item["quantity"],
-
-                "subtotal":
-                    item["subtotal"]
-
-            })
-
-        result.append({
-
-            "id":
-                order["id"],
-
-            "user_id":
-                order["user_id"],
-
-            "customer_name":
-                order["customer_name"],
-
-            "phone":
-                order["phone"],
-
-            "address":
-                order["address"],
-
-            "payment":
-                order["payment"],
-
-            "total":
-                order["total"],
-
-            "status":
-                order["status"],
-
-            "created_at":
-                order["created_at"],
-
-            "items":
-                item_list
-
-        })
-
-    conn.close()
-
-    return jsonify({
-
-        "success": True,
-
-        "count":
-            len(result),
-
-        "orders":
-            result
-
-    })
-
-
-# =========================================================
+# ============================================================
 # DELETE ORDER
-# =========================================================
+# ============================================================
 
 @app.route(
     "/api/orders/<int:order_id>",
@@ -2424,14 +1828,16 @@ def delete_order(order_id):
 
     conn = get_db()
 
+
     order = conn.execute(
         """
-        SELECT *
+        SELECT id
         FROM orders
         WHERE id = ?
         """,
         (order_id,)
     ).fetchone()
+
 
     if not order:
 
@@ -2442,17 +1848,10 @@ def delete_order(order_id):
             "success": False,
 
             "message":
-                "Order not found"
+                "Order not found."
 
         }), 404
 
-    conn.execute(
-        """
-        DELETE FROM order_items
-        WHERE order_id = ?
-        """,
-        (order_id,)
-    )
 
     conn.execute(
         """
@@ -2462,43 +1861,132 @@ def delete_order(order_id):
         (order_id,)
     )
 
+
     conn.commit()
 
     conn.close()
 
+
     return jsonify({
 
         "success": True,
 
         "message":
-            "Order deleted successfully"
+            "Order deleted successfully."
 
     })
 
 
-# =========================================================
-# HEALTH CHECK
-# =========================================================
+# ============================================================
+# DASHBOARD API
+# ============================================================
 
 @app.route(
-    "/api/health",
+    "/api/dashboard",
     methods=["GET"]
 )
-def health_check():
+def dashboard_api():
+
+    conn = get_db()
+
+
+    users = conn.execute(
+        "SELECT COUNT(*) AS count FROM users"
+    ).fetchone()["count"]
+
+
+    flowers = conn.execute(
+        "SELECT COUNT(*) AS count FROM flowers"
+    ).fetchone()["count"]
+
+
+    cart_items = conn.execute(
+        "SELECT COUNT(*) AS count FROM cart"
+    ).fetchone()["count"]
+
+
+    orders = conn.execute(
+        "SELECT COUNT(*) AS count FROM orders"
+    ).fetchone()["count"]
+
+
+    conn.close()
+
 
     return jsonify({
 
         "success": True,
 
-        "message":
-            "Blossom Flower Shop backend is working"
+        "users":
+            users,
+
+        "flowers":
+            flowers,
+
+        "cart_items":
+            cart_items,
+
+        "orders":
+            orders
 
     })
 
 
-# =========================================================
-# ERROR HANDLER
-# =========================================================
+# ============================================================
+# SWAGGER-LIKE API INFORMATION
+# ============================================================
+
+@app.route(
+    "/api",
+    methods=["GET"]
+)
+def api_home():
+
+    return jsonify({
+
+        "success": True,
+
+        "application":
+            "Blossom Flower Shop API",
+
+        "endpoints": [
+
+            "POST /api/register",
+
+            "POST /api/login",
+
+            "POST /api/logout",
+
+            "GET /api/me",
+
+            "POST /api/forgot-password",
+
+            "GET /api/flowers",
+
+            "POST /api/cart",
+
+            "GET /api/cart/<user_id>",
+
+            "PUT /api/cart/<cart_id>",
+
+            "DELETE /api/cart/<cart_id>",
+
+            "POST /api/orders",
+
+            "GET /api/orders/<user_id>",
+
+            "DELETE /api/orders/<order_id>",
+
+            "GET /api/dashboard"
+
+        ]
+
+    })
+
+
+# ============================================================
+# ERROR HANDLERS
+# ============================================================
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -2508,95 +1996,28 @@ def page_not_found(error):
         "success": False,
 
         "message":
-            "Page or API endpoint not found"
+            "Page or API endpoint not found."
 
     }), 404
 
 
-# =========================================================
+# ============================================================
 # START SERVER
-# =========================================================
+# ============================================================
 
 if __name__ == "__main__":
 
-    print("")
+    init_db()
 
-    print("==========================================")
-
-    print("🌸 BLOSSOM FLOWER SHOP")
-
-    print("==========================================")
-
-    print("")
-
-    print("Server:")
-
-    print(
-        "http://127.0.0.1:5000"
+    port = int(
+        os.environ.get(
+            "PORT",
+            5000
+        )
     )
-
-    print("")
-
-    print("Pages:")
-
-    print(
-        "http://127.0.0.1:5000/"
-    )
-
-    print(
-        "http://127.0.0.1:5000/login"
-    )
-
-    print(
-        "http://127.0.0.1:5000/register"
-    )
-
-    print(
-        "http://127.0.0.1:5000/forgot-password"
-    )
-
-    print(
-        "http://127.0.0.1:5000/dashboard"
-    )
-
-    print(
-        "http://127.0.0.1:5000/flower"
-    )
-
-    print(
-        "http://127.0.0.1:5000/cart"
-    )
-
-    print(
-        "http://127.0.0.1:5000/checkout"
-    )
-
-    print(
-        "http://127.0.0.1:5000/orders"
-    )
-
-    print("")
-
-    print("Swagger:")
-
-    print(
-        "http://127.0.0.1:5000/apidocs/"
-    )
-
-    print("")
-
-    print("API JSON:")
-
-    print(
-        "http://127.0.0.1:5000/apispec_1.json"
-    )
-
-    print("")
-
-    print("==========================================")
-
-    print("")
 
     app.run(
+        host="0.0.0.0",
+        port=port,
         debug=True
     )
