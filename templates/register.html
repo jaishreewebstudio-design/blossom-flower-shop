@@ -336,7 +336,7 @@
 
         Already have an account?
 
-        <a href="login.html">
+        <a href="/login">
             Login Here
         </a>
 
@@ -419,6 +419,7 @@
                     "red";
 
                 return;
+
             }
 
 
@@ -435,6 +436,7 @@
                     "red";
 
                 return;
+
             }
 
 
@@ -455,9 +457,23 @@
 
             try {
 
+                /*
+                 * IMPORTANT:
+                 *
+                 * Do NOT use:
+                 *
+                 * http://127.0.0.1:5000
+                 *
+                 * because the website is running
+                 * on Render.
+                 *
+                 * Relative API URL works both locally
+                 * and on Render.
+                 */
+
                 const response =
                     await fetch(
-                        "http://127.0.0.1:5000/api/register",
+                        "/api/register",
                         {
                             method: "POST",
 
@@ -507,7 +523,7 @@
                         function() {
 
                             window.location.href =
-                                "login.html";
+                                "/login";
 
                         },
                         1200
@@ -515,6 +531,7 @@
 
 
                     return;
+
                 }
 
 
@@ -533,7 +550,9 @@
                 registerButton.disabled =
                     false;
 
-            } catch (error) {
+            }
+
+            catch (error) {
 
                 console.error(
                     "Registration Error:",
