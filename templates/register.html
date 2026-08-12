@@ -12,7 +12,6 @@
 
     <title>Register - Blossom Flower Shop</title>
 
-
     <style>
 
         * {
@@ -20,7 +19,6 @@
             margin: 0;
             padding: 0;
         }
-
 
         body {
 
@@ -50,11 +48,6 @@
 
         }
 
-
-        /* =========================
-           REGISTER CONTAINER
-        ========================= */
-
         .register-container {
 
             width: 100%;
@@ -73,7 +66,6 @@
 
         }
 
-
         .register-container h1 {
 
             text-align: center;
@@ -86,7 +78,6 @@
 
         }
 
-
         .welcome-text {
 
             text-align: center;
@@ -96,7 +87,6 @@
             margin-bottom: 25px;
 
         }
-
 
         .register-container h2 {
 
@@ -108,11 +98,6 @@
 
         }
 
-
-        /* =========================
-           FORM
-        ========================= */
-
         #registerForm {
 
             display: flex;
@@ -122,7 +107,6 @@
             gap: 16px;
 
         }
-
 
         #registerForm input {
 
@@ -140,7 +124,6 @@
 
         }
 
-
         #registerForm input:focus {
 
             border-color: #d63384;
@@ -150,7 +133,6 @@
                 rgba(214, 51, 132, 0.10);
 
         }
-
 
         #registerForm button {
 
@@ -176,13 +158,11 @@
 
         }
 
-
         #registerForm button:hover {
 
             background: #ad1457;
 
         }
-
 
         #registerForm button:disabled {
 
@@ -191,7 +171,6 @@
             cursor: not-allowed;
 
         }
-
 
         #message {
 
@@ -203,11 +182,6 @@
 
         }
 
-
-        /* =========================
-           LOGIN LINK
-        ========================= */
-
         .account-text {
 
             text-align: center;
@@ -215,7 +189,6 @@
             margin-top: 20px;
 
         }
-
 
         .account-text a {
 
@@ -227,17 +200,11 @@
 
         }
 
-
         .account-text a:hover {
 
             text-decoration: underline;
 
         }
-
-
-        /* =========================
-           MOBILE
-        ========================= */
 
         @media (max-width: 500px) {
 
@@ -259,30 +226,23 @@
 
 </head>
 
-
 <body>
 
-
 <div class="register-container">
-
 
     <h1>
         🌸 Blossom Flower Shop
     </h1>
 
-
     <p class="welcome-text">
         Create New Account
     </p>
-
 
     <h2>
         Register
     </h2>
 
-
     <form id="registerForm">
-
 
         <input
             type="text"
@@ -291,14 +251,12 @@
             required
         >
 
-
         <input
             type="email"
             id="regEmail"
             placeholder="Enter Email"
             required
         >
-
 
         <input
             type="password"
@@ -308,7 +266,6 @@
             required
         >
 
-
         <input
             type="password"
             id="confirmPassword"
@@ -317,7 +274,6 @@
             required
         >
 
-
         <button
             type="submit"
             id="registerButton"
@@ -325,12 +281,9 @@
             Register
         </button>
 
-
         <p id="message"></p>
 
-
     </form>
-
 
     <p class="account-text">
 
@@ -342,32 +295,18 @@
 
     </p>
 
-
 </div>
-
 
 <script>
 
-    // =====================================
-    // REGISTER FORM
-    // =====================================
-
     const registerForm =
-        document.getElementById(
-            "registerForm"
-        );
-
+        document.getElementById("registerForm");
 
     const registerButton =
-        document.getElementById(
-            "registerButton"
-        );
-
+        document.getElementById("registerButton");
 
     const message =
-        document.getElementById(
-            "message"
-        );
+        document.getElementById("message");
 
 
     registerForm.addEventListener(
@@ -403,14 +342,7 @@
                     .value;
 
 
-            // =================================
-            // CHECK PASSWORD
-            // =================================
-
-            if (
-                password !==
-                confirmPassword
-            ) {
+            if (password !== confirmPassword) {
 
                 message.textContent =
                     "Passwords do not match.";
@@ -419,13 +351,8 @@
                     "red";
 
                 return;
-
             }
 
-
-            // =================================
-            // CHECK PASSWORD LENGTH
-            // =================================
 
             if (password.length < 6) {
 
@@ -436,13 +363,10 @@
                     "red";
 
                 return;
-
             }
 
 
-            registerButton.disabled =
-                true;
-
+            registerButton.disabled = true;
 
             message.textContent =
                 "Creating account...";
@@ -451,24 +375,19 @@
                 "#777";
 
 
-            // =================================
-            // SEND TO FLASK
-            // =================================
-
             try {
 
                 /*
                  * IMPORTANT:
+                 * Do NOT use 127.0.0.1 here.
                  *
-                 * Do NOT use:
+                 * Relative API URL works both:
                  *
-                 * http://127.0.0.1:5000
+                 * Local:
+                 * http://127.0.0.1:5000/api/register
                  *
-                 * because the website is running
-                 * on Render.
-                 *
-                 * Relative API URL works both locally
-                 * and on Render.
+                 * Render:
+                 * https://your-app.onrender.com/api/register
                  */
 
                 const response =
@@ -491,7 +410,6 @@
                                 password: password
 
                             })
-
                         }
                     );
 
@@ -499,10 +417,6 @@
                 const data =
                     await response.json();
 
-
-                // =================================
-                // SUCCESS
-                // =================================
 
                 if (
                     response.ok &&
@@ -531,13 +445,8 @@
 
 
                     return;
-
                 }
 
-
-                // =================================
-                // ERROR
-                // =================================
 
                 message.textContent =
                     data.message ||
@@ -561,7 +470,7 @@
 
 
                 message.textContent =
-                    "Unable to connect to Flask server.";
+                    "Unable to connect to server.";
 
                 message.style.color =
                     "red";
@@ -576,7 +485,6 @@
     );
 
 </script>
-
 
 </body>
 
