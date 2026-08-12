@@ -3,618 +3,520 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-    <title>Checkout | Blossom Flower Shop</title>
+<title>
+    Checkout | Blossom Flower Shop
+</title>
 
-    <style>
+<style>
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-        body {
+body {
 
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
 
-            background: #fff5f8;
+    background: #fff5f8;
 
-            color: #333;
+    color: #333;
 
-            min-height: 100vh;
+    min-height: 100vh;
 
-        }
+}
 
-        /* =====================================================
-           HEADER
-        ===================================================== */
+.dashboard-header {
 
-        .dashboard-header {
+    background: white;
 
-            background: white;
+    padding: 20px 50px;
 
-            padding: 20px 50px;
+    display: flex;
 
-            display: flex;
+    justify-content: space-between;
 
-            justify-content: space-between;
+    align-items: center;
 
-            align-items: center;
+    box-shadow:
+        0 3px 15px
+        rgba(0, 0, 0, 0.08);
 
-            box-shadow:
-                0 3px 15px
-                rgba(0, 0, 0, 0.08);
+    position: sticky;
 
-            position: sticky;
+    top: 0;
 
-            top: 0;
+    z-index: 100;
 
-            z-index: 100;
+}
 
-        }
+.dashboard-header h1 {
 
-        .dashboard-header h1 {
+    color: #d63384;
 
-            color: #d63384;
+    font-size: 27px;
 
-            font-size: 27px;
+}
 
-        }
+nav {
 
-        nav {
+    display: flex;
 
-            display: flex;
+    gap: 25px;
 
-            gap: 25px;
+    align-items: center;
 
-            align-items: center;
+}
 
-        }
+nav a {
 
-        nav a {
+    text-decoration: none;
 
-            text-decoration: none;
+    color: #444;
 
-            color: #444;
+    font-weight: 600;
 
-            font-weight: 600;
+}
 
-            transition: 0.2s;
+nav a:hover {
 
-        }
+    color: #d63384;
 
-        nav a:hover {
+}
 
-            color: #d63384;
+.checkout-section {
 
-        }
+    width: 100%;
 
+    padding: 50px 20px;
 
-        /* =====================================================
-           CHECKOUT SECTION
-        ===================================================== */
+}
 
-        .checkout-section {
+.checkout-container {
 
-            width: 100%;
+    max-width: 950px;
 
-            padding: 50px 20px;
+    margin: auto;
 
-        }
+    background: white;
 
-        .checkout-container {
+    padding: 35px;
 
-            max-width: 950px;
+    border-radius: 18px;
 
-            margin: auto;
+    box-shadow:
+        0 8px 30px
+        rgba(0, 0, 0, 0.08);
 
-            background: white;
+}
 
-            padding: 35px;
+.checkout-container h2 {
 
-            border-radius: 18px;
+    color: #c2185b;
 
-            box-shadow:
-                0 8px 30px
-                rgba(0, 0, 0, 0.08);
+    margin-bottom: 25px;
 
-        }
+    border-bottom:
+        2px solid #f3c1d3;
 
+    padding-bottom: 12px;
 
-        /* =====================================================
-           TITLE
-        ===================================================== */
+}
 
-        .checkout-container h2 {
+.form-group {
 
-            color: #c2185b;
+    margin-bottom: 20px;
 
-            margin-bottom: 25px;
+}
 
-            border-bottom:
-                2px solid #f3c1d3;
+.form-group label {
 
-            padding-bottom: 12px;
+    display: block;
 
-        }
+    margin-bottom: 8px;
 
+    font-weight: bold;
 
-        /* =====================================================
-           FORM
-        ===================================================== */
+    color: #555;
 
-        .form-group {
+}
 
-            margin-bottom: 20px;
+input,
+textarea,
+select {
 
-        }
+    width: 100%;
 
-        .form-group label {
+    padding: 13px 15px;
 
-            display: block;
+    border:
+        1px solid #ddd;
 
-            margin-bottom: 8px;
+    border-radius: 9px;
 
-            font-weight: bold;
+    font-size: 15px;
 
-            color: #555;
+    outline: none;
 
-        }
+}
 
-        input,
-        textarea,
-        select {
+input:focus,
+textarea:focus,
+select:focus {
 
-            width: 100%;
+    border-color: #d63384;
 
-            padding: 13px 15px;
+}
 
-            border:
-                1px solid #ddd;
+textarea {
 
-            border-radius: 9px;
+    min-height: 110px;
 
-            font-size: 15px;
+    resize: vertical;
 
-            outline: none;
+}
 
-            transition: 0.2s;
+.summary-title {
 
-        }
+    margin-top: 30px;
 
-        input:focus,
-        textarea:focus,
-        select:focus {
+    margin-bottom: 15px;
 
-            border-color: #d63384;
+    color: #c2185b;
 
-            box-shadow:
-                0 0 0 3px
-                rgba(214, 51, 132, 0.1);
+}
 
-        }
+#checkoutItems {
 
-        textarea {
+    border:
+        1px solid #eee;
 
-            min-height: 110px;
+    border-radius: 12px;
 
-            resize: vertical;
+    overflow: hidden;
 
-        }
+}
 
+.checkout-item {
 
-        /* =====================================================
-           FLOWERS TITLE
-        ===================================================== */
+    display: flex;
 
-        .summary-title {
+    align-items: center;
 
-            margin-top: 30px;
+    gap: 18px;
 
-            margin-bottom: 15px;
+    padding: 18px;
 
-            color: #c2185b;
+    border-bottom:
+        1px solid #eee;
 
-        }
+}
 
+.checkout-item:last-child {
 
-        /* =====================================================
-           CHECKOUT ITEMS
-        ===================================================== */
+    border-bottom: none;
 
-        #checkoutItems {
+}
 
-            border:
-                1px solid #eee;
+.checkout-item img {
 
-            border-radius: 12px;
+    width: 80px;
 
-            overflow: hidden;
+    height: 80px;
 
-            background: white;
+    object-fit: cover;
 
-        }
+    border-radius: 10px;
 
-        .checkout-item {
+}
 
-            display: flex;
+.checkout-item-info {
 
-            align-items: center;
+    flex: 1;
 
-            gap: 18px;
+}
 
-            padding: 18px;
+.checkout-item-info h4 {
 
-            border-bottom:
-                1px solid #eee;
+    color: #c2185b;
 
-        }
+    margin-bottom: 7px;
 
-        .checkout-item:last-child {
+}
 
-            border-bottom: none;
+.checkout-item-info p {
 
-        }
+    color: #666;
 
-        .checkout-item img {
+    margin: 4px 0;
 
-            width: 80px;
+    font-size: 14px;
 
-            height: 80px;
+}
 
-            object-fit: cover;
+.item-price {
 
-            border-radius: 10px;
+    font-weight: bold;
 
-            flex-shrink: 0;
+    color: #d63384;
 
-        }
+    font-size: 18px;
 
-        .checkout-item-info {
+}
 
-            flex: 1;
+.ordered-badge {
 
-        }
+    display: inline-block;
 
-        .checkout-item-info h4 {
+    margin-top: 8px;
 
-            color: #c2185b;
+    padding: 5px 10px;
 
-            margin-bottom: 7px;
+    background: #e8f7ed;
 
-            font-size: 18px;
+    color: #218838;
 
-        }
+    border:
+        1px solid #b7e4c7;
 
-        .checkout-item-info p {
+    border-radius: 20px;
 
-            color: #666;
+    font-size: 12px;
 
-            margin: 4px 0;
+    font-weight: bold;
 
-            font-size: 14px;
+}
 
-        }
+.order-summary {
 
-        .item-price {
+    margin-top: 25px;
 
-            font-weight: bold;
+    padding: 22px;
 
-            color: #d63384;
+    background: #fff5f8;
 
-            font-size: 18px;
+    border:
+        1px solid #f4c8d9;
 
-            white-space: nowrap;
+    border-radius: 12px;
 
-        }
+}
 
+.order-summary h3 {
 
-        /* =====================================================
-           ORDERED BADGE
-        ===================================================== */
+    color: #c2185b;
 
-        .ordered-badge {
+    display: flex;
 
-            display: inline-block;
+    justify-content: space-between;
 
-            margin-top: 8px;
+}
 
-            padding: 5px 10px;
+#checkoutTotal {
 
-            background: #e8f7ed;
+    color: #d63384;
 
-            color: #218838;
+    font-size: 24px;
 
-            border: 1px solid #b7e4c7;
+}
 
-            border-radius: 20px;
+.button-row {
 
-            font-size: 12px;
+    display: flex;
 
-            font-weight: bold;
+    gap: 15px;
 
-        }
+    margin-top: 25px;
 
+}
 
-        /* =====================================================
-           ORDER SUMMARY
-        ===================================================== */
+.btn {
 
-        .order-summary {
+    flex: 1;
 
-            margin-top: 25px;
+    padding: 14px;
 
-            padding: 22px;
+    border: none;
 
-            background: #fff5f8;
+    border-radius: 9px;
 
-            border:
-                1px solid #f4c8d9;
+    font-size: 16px;
 
-            border-radius: 12px;
+    font-weight: bold;
 
-        }
+    cursor: pointer;
 
-        .order-summary h3 {
+    text-align: center;
 
-            color: #c2185b;
+    text-decoration: none;
 
-            display: flex;
+}
 
-            justify-content: space-between;
+.btn-primary {
 
-            align-items: center;
+    background: #d63384;
 
-            gap: 20px;
+    color: white;
 
-        }
+}
 
-        #checkoutTotal {
+.btn-primary:hover {
 
-            color: #d63384;
+    background: #ad1457;
 
-            font-size: 24px;
+}
 
-        }
+.btn-primary:disabled {
 
+    background: #c9a0b2;
 
-        /* =====================================================
-           BUTTONS
-        ===================================================== */
+    cursor: not-allowed;
 
-        .button-row {
+}
 
-            display: flex;
+.btn-secondary {
 
-            gap: 15px;
+    background: #ffe0ea;
 
-            margin-top: 25px;
+    color: #c2185b;
 
-        }
+}
 
-        .btn {
+.empty-checkout {
 
-            flex: 1;
+    text-align: center;
 
-            padding: 14px;
+    padding: 40px 20px;
 
-            border: none;
+}
 
-            border-radius: 9px;
+.empty-checkout h2 {
 
-            font-size: 16px;
+    color: #d63384;
 
-            font-weight: bold;
+    margin-bottom: 10px;
 
-            cursor: pointer;
+}
 
-            text-align: center;
+.empty-checkout p {
 
-            text-decoration: none;
+    color: #666;
 
-            transition: 0.2s;
+    margin-bottom: 20px;
 
-        }
+}
 
-        .btn-primary {
+.loading {
 
-            background: #d63384;
+    text-align: center;
 
-            color: white;
+    padding: 30px;
 
-        }
+    color: #777;
 
-        .btn-primary:hover {
+}
 
-            background: #ad1457;
+.success-message {
 
-        }
+    display: none;
 
-        .btn-primary:disabled {
+    margin-bottom: 20px;
 
-            background: #c9a0b2;
+    padding: 15px 18px;
 
-            cursor: not-allowed;
+    background: #e8f7ed;
 
-        }
+    border:
+        1px solid #b7e4c7;
 
-        .btn-secondary {
+    color: #218838;
 
-            background: #ffe0ea;
+    border-radius: 10px;
 
-            color: #c2185b;
+    font-weight: bold;
 
-        }
+}
 
-        .btn-secondary:hover {
+.error-message {
 
-            background: #ffd0df;
+    display: none;
 
-        }
+    margin-bottom: 20px;
 
+    padding: 15px 18px;
 
-        /* =====================================================
-           EMPTY / MESSAGE
-        ===================================================== */
+    background: #fff0f0;
 
-        .empty-checkout {
+    border:
+        1px solid #f0b8b8;
 
-            text-align: center;
+    color: #c62828;
 
-            padding: 40px 20px;
+    border-radius: 10px;
 
-        }
+    font-weight: bold;
 
-        .empty-checkout h2 {
+}
 
-            color: #d63384;
+@media (max-width: 700px) {
 
-            margin-bottom: 10px;
+    .dashboard-header {
 
-        }
+        flex-direction: column;
 
-        .empty-checkout p {
+        gap: 15px;
 
-            color: #666;
+        padding: 20px;
 
-            margin-bottom: 20px;
+    }
 
-        }
+    nav {
 
-        .loading {
+        flex-wrap: wrap;
 
-            text-align: center;
+        justify-content: center;
 
-            padding: 30px;
+        gap: 15px;
 
-            color: #777;
+    }
 
-        }
+    .checkout-container {
 
+        padding: 22px;
 
-        /* =====================================================
-           SUCCESS MESSAGE
-        ===================================================== */
+    }
 
-        .success-message {
+    .checkout-item {
 
-            display: none;
+        align-items: flex-start;
 
-            margin-bottom: 20px;
+    }
 
-            padding: 15px 18px;
+    .button-row {
 
-            background: #e8f7ed;
+        flex-direction: column;
 
-            border: 1px solid #b7e4c7;
+    }
 
-            color: #218838;
+}
 
-            border-radius: 10px;
-
-            font-weight: bold;
-
-        }
-
-
-        /* =====================================================
-           ERROR MESSAGE
-        ===================================================== */
-
-        .error-message {
-
-            display: none;
-
-            margin-bottom: 20px;
-
-            padding: 15px 18px;
-
-            background: #fff0f0;
-
-            border: 1px solid #f0b8b8;
-
-            color: #c62828;
-
-            border-radius: 10px;
-
-            font-weight: bold;
-
-        }
-
-
-        /* =====================================================
-           RESPONSIVE
-        ===================================================== */
-
-        @media (max-width: 700px) {
-
-            .dashboard-header {
-
-                flex-direction: column;
-
-                gap: 15px;
-
-                padding: 20px;
-
-            }
-
-            nav {
-
-                flex-wrap: wrap;
-
-                justify-content: center;
-
-                gap: 15px;
-
-            }
-
-            .checkout-container {
-
-                padding: 22px;
-
-            }
-
-            .checkout-item {
-
-                align-items: flex-start;
-
-            }
-
-            .item-price {
-
-                font-size: 16px;
-
-            }
-
-            .button-row {
-
-                flex-direction: column;
-
-            }
-
-        }
-
-    </style>
+</style>
 
 </head>
 
 
 <body>
-
-
-<!-- =========================================================
-     HEADER
-========================================================= -->
 
 <header class="dashboard-header">
 
@@ -649,243 +551,172 @@
 </header>
 
 
-<!-- =========================================================
-     CHECKOUT
-========================================================= -->
-
 <section class="checkout-section">
 
-    <div class="checkout-container">
+<div class="checkout-container">
 
+<h2>
+    Customer Details
+</h2>
 
-        <h2>
-            Customer Details
-        </h2>
 
+<div
+    id="successMessage"
+    class="success-message"
+></div>
 
-        <!-- SUCCESS -->
 
-        <div
-            id="successMessage"
-            class="success-message"
-        >
-            🌸 Order placed successfully!
-        </div>
+<div
+    id="errorMessage"
+    class="error-message"
+></div>
 
 
-        <!-- ERROR -->
+<form id="checkoutForm">
 
-        <div
-            id="errorMessage"
-            class="error-message"
-        >
-            Something went wrong.
-        </div>
+<div class="form-group">
 
+<label for="customerName">
+    Full Name
+</label>
 
-        <!-- =================================================
-             FORM
-        ================================================== -->
+<input
+    type="text"
+    id="customerName"
+    placeholder="Enter your full name"
+    required
+>
 
-        <form id="checkoutForm">
+</div>
 
 
-            <!-- NAME -->
+<div class="form-group">
 
-            <div class="form-group">
+<label for="customerPhone">
+    Mobile Number
+</label>
 
-                <label for="customerName">
+<input
+    type="tel"
+    id="customerPhone"
+    placeholder="Enter 10 digit mobile number"
+    pattern="[0-9]{10}"
+    maxlength="10"
+    required
+>
 
-                    Full Name
+</div>
 
-                </label>
 
-                <input
-                    type="text"
-                    id="customerName"
-                    placeholder="Enter your full name"
-                    required
-                >
+<div class="form-group">
 
-            </div>
+<label for="customerAddress">
+    Delivery Address
+</label>
 
+<textarea
+    id="customerAddress"
+    placeholder="Enter complete delivery address"
+    required
+></textarea>
 
-            <!-- PHONE -->
+</div>
 
-            <div class="form-group">
 
-                <label for="customerPhone">
+<div class="form-group">
 
-                    Mobile Number
+<label for="paymentMethod">
+    Payment Method
+</label>
 
-                </label>
+<select
+    id="paymentMethod"
+    required
+>
 
-                <input
-                    type="tel"
-                    id="customerPhone"
-                    placeholder="Enter 10 digit mobile number"
-                    pattern="[0-9]{10}"
-                    maxlength="10"
-                    required
-                >
+<option value="Cash On Delivery">
+    Cash On Delivery
+</option>
 
-            </div>
+<option value="UPI">
+    UPI
+</option>
 
+<option value="Credit Card">
+    Credit Card
+</option>
 
-            <!-- ADDRESS -->
+<option value="Debit Card">
+    Debit Card
+</option>
 
-            <div class="form-group">
+</select>
 
-                <label for="customerAddress">
+</div>
 
-                    Delivery Address
 
-                </label>
+<h3 class="summary-title">
+    🌸 Selected Flowers
+</h3>
 
-                <textarea
-                    id="customerAddress"
-                    placeholder="Enter complete delivery address"
-                    required
-                ></textarea>
 
-            </div>
+<div id="checkoutItems">
 
+<div class="loading">
+    Loading selected flowers...
+</div>
 
-            <!-- PAYMENT -->
+</div>
 
-            <div class="form-group">
 
-                <label for="paymentMethod">
+<div class="order-summary">
 
-                    Payment Method
+<h3>
 
-                </label>
+<span>
+    Grand Total
+</span>
 
-                <select
-                    id="paymentMethod"
-                    required
-                >
+<span>
+    ₹<span id="checkoutTotal">0.00</span>
+</span>
 
-                    <option value="Cash On Delivery">
-                        Cash On Delivery
-                    </option>
+</h3>
 
-                    <option value="UPI">
-                        UPI
-                    </option>
+</div>
 
-                    <option value="Credit Card">
-                        Credit Card
-                    </option>
 
-                    <option value="Debit Card">
-                        Debit Card
-                    </option>
+<div class="button-row">
 
-                </select>
+<a
+    href="{{ url_for('cart_page') }}"
+    class="btn btn-secondary"
+>
+    ← Back to Cart
+</a>
 
-            </div>
+<button
+    type="submit"
+    class="btn btn-primary"
+    id="placeOrderButton"
+>
+    🌸 Place Order
+</button>
 
+</div>
 
-            <!-- =================================================
-                 SELECTED FLOWERS
-            ================================================== -->
+</form>
 
-            <h3 class="summary-title">
-
-                🌸 Selected Flowers
-
-            </h3>
-
-
-            <div id="checkoutItems">
-
-                <div class="loading">
-
-                    Loading selected flowers...
-
-                </div>
-
-            </div>
-
-
-            <!-- =================================================
-                 TOTAL
-            ================================================== -->
-
-            <div class="order-summary">
-
-                <h3>
-
-                    <span>
-                        Grand Total
-                    </span>
-
-                    <span>
-
-                        ₹<span id="checkoutTotal">
-                            0.00
-                        </span>
-
-                    </span>
-
-                </h3>
-
-            </div>
-
-
-            <!-- =================================================
-                 BUTTONS
-            ================================================== -->
-
-            <div class="button-row">
-
-
-                <a
-                    href="{{ url_for('cart_page') }}"
-                    class="btn btn-secondary"
-                >
-
-                    ← Back to Cart
-
-                </a>
-
-
-                <button
-                    type="submit"
-                    class="btn btn-primary"
-                    id="placeOrderButton"
-                >
-
-                    🌸 Place Order
-
-                </button>
-
-
-            </div>
-
-
-        </form>
-
-    </div>
+</div>
 
 </section>
 
 
 <script>
 
-
-/* =========================================================
-   API
-========================================================= */
-
 const API_URL =
     window.location.origin;
 
-
-/* =========================================================
-   VARIABLES
-========================================================= */
 
 let cart = [];
 
@@ -893,10 +724,6 @@ let selectedCartIds = [];
 
 let total = 0;
 
-
-/* =========================================================
-   GET CURRENT USER
-========================================================= */
 
 function getCurrentUser() {
 
@@ -917,12 +744,7 @@ function getCurrentUser() {
             userData
         );
 
-    } catch (error) {
-
-        console.error(
-            "User data error:",
-            error
-        );
+    } catch {
 
         return null;
 
@@ -930,10 +752,6 @@ function getCurrentUser() {
 
 }
 
-
-/* =========================================================
-   GET SELECTED CART IDS
-========================================================= */
 
 function getSelectedIds() {
 
@@ -953,24 +771,15 @@ function getSelectedIds() {
         const ids =
             JSON.parse(stored);
 
-        if (!Array.isArray(ids)) {
+        return Array.isArray(ids)
+            ? ids
+                .map(Number)
+                .filter(
+                    id => !isNaN(id)
+                )
+            : [];
 
-            return [];
-
-        }
-
-        return ids
-            .map(Number)
-            .filter(
-                id => !isNaN(id)
-            );
-
-    } catch (error) {
-
-        console.error(
-            "Selected cart IDs error:",
-            error
-        );
+    } catch {
 
         return [];
 
@@ -978,10 +787,6 @@ function getSelectedIds() {
 
 }
 
-
-/* =========================================================
-   SHOW ERROR
-========================================================= */
 
 function showError(message) {
 
@@ -999,10 +804,6 @@ function showError(message) {
 }
 
 
-/* =========================================================
-   HIDE ERROR
-========================================================= */
-
 function hideError() {
 
     document.getElementById(
@@ -1012,10 +813,6 @@ function hideError() {
 
 }
 
-
-/* =========================================================
-   SHOW SUCCESS
-========================================================= */
 
 function showSuccess(message) {
 
@@ -1033,27 +830,21 @@ function showSuccess(message) {
 }
 
 
-/* =========================================================
-   LOAD CHECKOUT CART
-========================================================= */
-
 async function loadCheckoutCart() {
 
     const user =
         getCurrentUser();
+
 
     const container =
         document.getElementById(
             "checkoutItems"
         );
 
+
     selectedCartIds =
         getSelectedIds();
 
-
-    /* -------------------------------------------------------
-       USER CHECK
-    ------------------------------------------------------- */
 
     if (
         !user ||
@@ -1089,10 +880,6 @@ async function loadCheckoutCart() {
 
     }
 
-
-    /* -------------------------------------------------------
-       SELECTED ITEMS CHECK
-    ------------------------------------------------------- */
 
     if (
         selectedCartIds.length === 0
@@ -1130,10 +917,6 @@ async function loadCheckoutCart() {
 
     try {
 
-        /* ---------------------------------------------------
-           GET USER CART
-        --------------------------------------------------- */
-
         const response =
             await fetch(
                 `${API_URL}/api/cart/${user.id}`
@@ -1151,7 +934,7 @@ async function loadCheckoutCart() {
 
             throw new Error(
                 data.message ||
-                "Unable to load cart"
+                "Unable to load cart."
             );
 
         }
@@ -1161,35 +944,24 @@ async function loadCheckoutCart() {
             data.cart || [];
 
 
-        /* ---------------------------------------------------
-           ONLY SELECTED ITEMS
-        --------------------------------------------------- */
-
         cart =
             allCart.filter(
-                function(item) {
-
-                    return selectedCartIds.includes(
+                item =>
+                    selectedCartIds.includes(
                         Number(item.id)
-                    );
-
-                }
+                    )
             );
 
-
-        /* ---------------------------------------------------
-           CALCULATE TOTAL
-        --------------------------------------------------- */
 
         total = 0;
 
 
         cart.forEach(
-            function(item) {
+            item => {
 
                 total +=
                     Number(
-                        item.subtotal
+                        item.subtotal || 0
                     );
 
             }
@@ -1198,11 +970,11 @@ async function loadCheckoutCart() {
 
         displayCheckoutCart();
 
+    }
 
-    } catch (error) {
+    catch (error) {
 
         console.error(
-            "Checkout loading error:",
             error
         );
 
@@ -1216,7 +988,7 @@ async function loadCheckoutCart() {
                 </h2>
 
                 <p>
-                    ${error.message}
+                    ${escapeHtml(error.message)}
                 </p>
 
                 <a
@@ -1236,10 +1008,6 @@ async function loadCheckoutCart() {
 
 }
 
-
-/* =========================================================
-   DISPLAY CHECKOUT CART
-========================================================= */
 
 function displayCheckoutCart() {
 
@@ -1286,8 +1054,7 @@ function displayCheckoutCart() {
 
 
     cart.forEach(
-        function(item) {
-
+        item => {
 
             const card =
                 document.createElement(
@@ -1302,54 +1069,39 @@ function displayCheckoutCart() {
             card.innerHTML = `
 
                 <img
-                    src="${item.image || ''}"
+                    src="${escapeHtml(item.image || '')}"
                     alt="${escapeHtml(item.name)}"
                 >
-
 
                 <div class="checkout-item-info">
 
                     <h4>
-
                         🌸
                         ${escapeHtml(item.name)}
-
                     </h4>
 
-
                     <p>
-
                         Price:
                         ₹${Number(
-                            item.price
+                            item.price || 0
                         ).toFixed(2)}
-
                     </p>
-
 
                     <p>
-
                         Quantity:
                         ${item.quantity}
-
                     </p>
 
-
                     <span class="ordered-badge">
-
                         ✓ Ready To Order
-
                     </span>
 
                 </div>
 
-
                 <div class="item-price">
-
                     ₹${Number(
-                        item.subtotal
+                        item.subtotal || 0
                     ).toFixed(2)}
-
                 </div>
 
             `;
@@ -1365,10 +1117,6 @@ function displayCheckoutCart() {
 }
 
 
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
-
 function escapeHtml(value) {
 
     if (
@@ -1381,22 +1129,27 @@ function escapeHtml(value) {
     }
 
     return String(value)
+
         .replace(
             /&/g,
             "&amp;"
         )
+
         .replace(
             /</g,
             "&lt;"
         )
+
         .replace(
             />/g,
             "&gt;"
         )
+
         .replace(
             /"/g,
             "&quot;"
         )
+
         .replace(
             /'/g,
             "&#039;"
@@ -1405,10 +1158,6 @@ function escapeHtml(value) {
 }
 
 
-/* =========================================================
-   PLACE ORDER
-========================================================= */
-
 document
     .getElementById(
         "checkoutForm"
@@ -1416,7 +1165,6 @@ document
     .addEventListener(
         "submit",
         async function(event) {
-
 
             event.preventDefault();
 
@@ -1427,10 +1175,6 @@ document
             const user =
                 getCurrentUser();
 
-
-            /* ------------------------------------------------
-               USER CHECK
-            ------------------------------------------------ */
 
             if (
                 !user ||
@@ -1446,10 +1190,6 @@ document
             }
 
 
-            /* ------------------------------------------------
-               SELECTED ITEMS CHECK
-            ------------------------------------------------ */
-
             if (
                 selectedCartIds.length === 0 ||
                 cart.length === 0
@@ -1464,27 +1204,11 @@ document
             }
 
 
-            /* ------------------------------------------------
-               GET BUTTON
-            ------------------------------------------------ */
-
             const button =
                 document.getElementById(
                     "placeOrderButton"
                 );
 
-
-            button.disabled =
-                true;
-
-
-            button.textContent =
-                "Placing Order...";
-
-
-            /* ------------------------------------------------
-               CUSTOMER DETAILS
-            ------------------------------------------------ */
 
             const customerName =
                 document
@@ -1521,10 +1245,6 @@ document
                     .value;
 
 
-            /* ------------------------------------------------
-               PHONE VALIDATION
-            ------------------------------------------------ */
-
             if (
                 !/^[0-9]{10}$/.test(
                     customerPhone
@@ -1535,30 +1255,19 @@ document
                     "Please enter a valid 10 digit mobile number."
                 );
 
-                button.disabled =
-                    false;
-
-                button.textContent =
-                    "🌸 Place Order";
-
                 return;
 
             }
 
 
+            button.disabled =
+                true;
+
+            button.textContent =
+                "Placing Order...";
+
+
             try {
-
-
-                /* =============================================
-                   IMPORTANT
-
-                   The backend currently creates an order
-                   from the user's COMPLETE CART.
-
-                   Therefore we first check that selected
-                   items exist in the cart.
-                ============================================= */
-
 
                 const response =
                     await fetch(
@@ -1612,28 +1321,11 @@ document
 
                     throw new Error(
                         data.message ||
-                        "Unable to place order"
+                        "Unable to place order."
                     );
 
                 }
 
-
-                /* =================================================
-                   ORDER SUCCESS
-                   
-                   IMPORTANT:
-                   We DO NOT delete the selected IDs permanently
-                   from cart UI.
-
-                   Backend should mark/process the order while
-                   cart remains available according to your
-                   requested design.
-                ================================================== */
-
-
-                /* -------------------------------------------------
-                   Save last order information
-                ------------------------------------------------- */
 
                 if (data.order) {
 
@@ -1647,78 +1339,33 @@ document
                 }
 
 
-                /* -------------------------------------------------
-                   Notify cart page
-                ------------------------------------------------- */
-
                 localStorage.setItem(
                     "cartUpdated",
                     Date.now().toString()
                 );
 
 
-                /* -------------------------------------------------
-                   Save ordered cart IDs
-                ------------------------------------------------- */
-
-                const oldOrdered =
-                    JSON.parse(
-                        localStorage.getItem(
-                            "orderedCartIds"
-                        ) || "[]"
-                    );
-
-
-                const updatedOrdered =
-                    [
-                        ...new Set(
-                            [
-                                ...oldOrdered,
-                                ...selectedCartIds
-                            ]
-                        )
-                    ];
-
-
                 localStorage.setItem(
                     "orderedCartIds",
                     JSON.stringify(
-                        updatedOrdered
+                        selectedCartIds
                     )
                 );
 
-
-                /* -------------------------------------------------
-                   Clear ONLY checkout selection
-
-                   Cart itself is NOT cleared.
-                ------------------------------------------------- */
 
                 sessionStorage.removeItem(
                     "selectedCartIds"
                 );
 
 
-                /* -------------------------------------------------
-                   Success message
-                ------------------------------------------------- */
-
                 showSuccess(
-                    "Order placed successfully! Your flower will remain visible in Cart as Ordered."
+                    "Order placed successfully!"
                 );
 
 
                 button.textContent =
                     "✓ Order Placed";
 
-
-                button.disabled =
-                    true;
-
-
-                /* -------------------------------------------------
-                   Redirect to orders after short delay
-                ------------------------------------------------- */
 
                 setTimeout(
                     function() {
@@ -1730,9 +1377,9 @@ document
                     1500
                 );
 
+            }
 
-            } catch (error) {
-
+            catch (error) {
 
                 console.error(
                     "Order Error:",
@@ -1742,7 +1389,6 @@ document
 
                 button.disabled =
                     false;
-
 
                 button.textContent =
                     "🌸 Place Order";
@@ -1758,10 +1404,6 @@ document
         }
     );
 
-
-/* =========================================================
-   DISABLE ORDER BUTTON
-========================================================= */
 
 function disableOrderButton() {
 
@@ -1780,10 +1422,6 @@ function disableOrderButton() {
 
 }
 
-
-/* =========================================================
-   PREFILL USER
-========================================================= */
 
 function prefillUser() {
 
@@ -1806,10 +1444,6 @@ function prefillUser() {
 }
 
 
-/* =========================================================
-   PAGE LOAD
-========================================================= */
-
 document.addEventListener(
     "DOMContentLoaded",
     function() {
@@ -1821,9 +1455,7 @@ document.addEventListener(
     }
 );
 
-
 </script>
-
 
 </body>
 
