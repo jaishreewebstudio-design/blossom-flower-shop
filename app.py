@@ -18,23 +18,23 @@ from werkzeug.security import (
     check_password_hash
 )
 
+
 # =========================================================
 # FLASK APP
 # =========================================================
 
 app = Flask(__name__)
 
-# Secret key for login session
 app.secret_key = "blossom_flower_shop_secret_key_2026"
 
 CORS(app)
+
 
 # =========================================================
 # SWAGGER CONFIGURATION
 # =========================================================
 
 swagger_template = {
-
     "swagger": "2.0",
 
     "info": {
@@ -45,6 +45,7 @@ swagger_template = {
         Features:
         - User Registration
         - User Login
+        - Forgot Password
         - User Session
         - Flowers
         - Shopping Cart
@@ -70,32 +71,26 @@ swagger_template = {
     ],
 
     "tags": [
-
         {
             "name": "Authentication",
             "description": "Registration, login, logout and user session"
         },
-
         {
             "name": "Flowers",
             "description": "Flower APIs"
         },
-
         {
             "name": "Cart",
             "description": "Shopping cart APIs"
         },
-
         {
             "name": "Orders",
             "description": "Order and checkout APIs"
         },
-
         {
             "name": "System",
             "description": "System and health APIs"
         }
-
     ]
 }
 
@@ -103,6 +98,7 @@ swagger = Swagger(
     app,
     template=swagger_template
 )
+
 
 # =========================================================
 # DATABASE
@@ -112,6 +108,7 @@ DATABASE = os.path.join(
     os.path.dirname(__file__),
     "flower_shop.db"
 )
+
 
 # =========================================================
 # DATABASE CONNECTION
@@ -385,6 +382,7 @@ def init_db():
 
 init_db()
 
+
 # =========================================================
 # FRONTEND PAGE ROUTES
 # =========================================================
@@ -392,24 +390,20 @@ init_db()
 @app.route("/")
 def index():
     return render_template("register.html")
+
+
 # =========================================================
 # HOME
 # =========================================================
 
 @app.route("/home")
 def home_page():
-
-    return render_template(
-        "home.html"
-    )
+    return render_template("home.html")
 
 
 @app.route("/home.html")
 def home_html():
-
-    return render_template(
-        "home.html"
-    )
+    return render_template("home.html")
 
 
 # =========================================================
@@ -418,18 +412,12 @@ def home_html():
 
 @app.route("/login")
 def login_page():
-
-    return render_template(
-        "login.html"
-    )
+    return render_template("login.html")
 
 
 @app.route("/login.html")
 def login_html():
-
-    return render_template(
-        "login.html"
-    )
+    return render_template("login.html")
 
 
 # =========================================================
@@ -438,18 +426,12 @@ def login_html():
 
 @app.route("/forgot-password")
 def forgot_password_page():
-
-    return render_template(
-        "forgot-password.html"
-    )
+    return render_template("forgot-password.html")
 
 
 @app.route("/forgot-password.html")
 def forgot_password_html():
-
-    return render_template(
-        "forgot-password.html"
-    )
+    return render_template("forgot-password.html")
 
 
 # =========================================================
@@ -458,18 +440,12 @@ def forgot_password_html():
 
 @app.route("/register")
 def register_page():
-
-    return render_template(
-        "register.html"
-    )
+    return render_template("register.html")
 
 
 @app.route("/register.html")
 def register_html():
-
-    return render_template(
-        "register.html"
-    )
+    return render_template("register.html")
 
 
 # =========================================================
@@ -478,18 +454,12 @@ def register_html():
 
 @app.route("/dashboard")
 def dashboard_page():
-
-    return render_template(
-        "dashboard.html"
-    )
+    return render_template("dashboard.html")
 
 
 @app.route("/dashboard.html")
 def dashboard_html():
-
-    return render_template(
-        "dashboard.html"
-    )
+    return render_template("dashboard.html")
 
 
 # =========================================================
@@ -498,26 +468,17 @@ def dashboard_html():
 
 @app.route("/flower")
 def flower_page():
-
-    return render_template(
-        "flower.html"
-    )
+    return render_template("flower.html")
 
 
 @app.route("/flower.html")
 def flower_html():
-
-    return render_template(
-        "flower.html"
-    )
+    return render_template("flower.html")
 
 
 @app.route("/flowers")
 def flowers_page():
-
-    return render_template(
-        "flower.html"
-    )
+    return render_template("flower.html")
 
 
 # =========================================================
@@ -526,18 +487,12 @@ def flowers_page():
 
 @app.route("/cart")
 def cart_page():
-
-    return render_template(
-        "cart.html"
-    )
+    return render_template("cart.html")
 
 
 @app.route("/cart.html")
 def cart_html():
-
-    return render_template(
-        "cart.html"
-    )
+    return render_template("cart.html")
 
 
 # =========================================================
@@ -546,18 +501,12 @@ def cart_html():
 
 @app.route("/checkout")
 def checkout_page():
-
-    return render_template(
-        "checkout.html"
-    )
+    return render_template("checkout.html")
 
 
 @app.route("/checkout.html")
 def checkout_html():
-
-    return render_template(
-        "checkout.html"
-    )
+    return render_template("checkout.html")
 
 
 # =========================================================
@@ -566,18 +515,12 @@ def checkout_html():
 
 @app.route("/orders")
 def orders_page():
-
-    return render_template(
-        "orders.html"
-    )
+    return render_template("orders.html")
 
 
 @app.route("/orders.html")
 def orders_html():
-
-    return render_template(
-        "orders.html"
-    )
+    return render_template("orders.html")
 
 
 # =========================================================
@@ -586,18 +529,12 @@ def orders_html():
 
 @app.route("/about")
 def about_page():
-
-    return render_template(
-        "about.html"
-    )
+    return render_template("about.html")
 
 
 @app.route("/about.html")
 def about_html():
-
-    return render_template(
-        "about.html"
-    )
+    return render_template("about.html")
 
 
 # =========================================================
@@ -606,18 +543,12 @@ def about_html():
 
 @app.route("/contact")
 def contact_page():
-
-    return render_template(
-        "contact.html"
-    )
+    return render_template("contact.html")
 
 
 @app.route("/contact.html")
 def contact_html():
-
-    return render_template(
-        "contact.html"
-    )
+    return render_template("contact.html")
 
 
 # =========================================================
@@ -626,7 +557,6 @@ def contact_html():
 
 @app.route("/style.css")
 def style_css():
-
     return send_from_directory(
         os.path.dirname(__file__),
         "style.css"
@@ -639,7 +569,6 @@ def style_css():
 
 @app.route("/js/<path:filename>")
 def javascript_files(filename):
-
     return send_from_directory(
         os.path.join(
             os.path.dirname(__file__),
@@ -666,12 +595,8 @@ def home_api():
     """
 
     return jsonify({
-
         "success": True,
-
-        "message":
-            "Blossom Flower Shop API is running"
-
+        "message": "Blossom Flower Shop API is running"
     })
 
 
@@ -686,52 +611,15 @@ def register():
     ---
     tags:
       - Authentication
-
-    parameters:
-
-      - in: body
-        name: body
-        required: true
-        schema:
-          type: object
-          required:
-            - name
-            - email
-            - password
-          properties:
-            name:
-              type: string
-              example: John Doe
-            email:
-              type: string
-              example: john@gmail.com
-            password:
-              type: string
-              example: 123456
-
-    responses:
-
-      201:
-        description: Registration successful
-
-      400:
-        description: Invalid request
-
-      409:
-        description: Email already registered
     """
 
-    data = request.get_json()
+    data = request.get_json(silent=True)
 
     if not data:
 
         return jsonify({
-
             "success": False,
-
-            "message":
-                "Request body is required"
-
+            "message": "Request body is required"
         }), 400
 
     name = data.get(
@@ -752,23 +640,15 @@ def register():
     if not name or not email or not password:
 
         return jsonify({
-
             "success": False,
-
-            "message":
-                "Name, email and password are required"
-
+            "message": "Name, email and password are required"
         }), 400
 
     if len(password) < 6:
 
         return jsonify({
-
             "success": False,
-
-            "message":
-                "Password must be at least 6 characters"
-
+            "message": "Password must be at least 6 characters"
         }), 400
 
     conn = get_db()
@@ -787,17 +667,11 @@ def register():
         conn.close()
 
         return jsonify({
-
             "success": False,
-
-            "message":
-                "Email already registered. Please login."
-
+            "message": "Email already registered. Please login."
         }), 409
 
-    hashed_password = generate_password_hash(
-        password
-    )
+    hashed_password = generate_password_hash(password)
 
     cursor = conn.execute(
         """
@@ -853,51 +727,15 @@ def login():
     ---
     tags:
       - Authentication
-
-    parameters:
-
-      - in: body
-        name: body
-        required: true
-        schema:
-          type: object
-          required:
-            - email
-            - password
-          properties:
-            email:
-              type: string
-              example: john@gmail.com
-            password:
-              type: string
-              example: 123456
-
-    responses:
-
-      200:
-        description: Login successful
-
-      400:
-        description: Email and password required
-
-      401:
-        description: Incorrect password
-
-      404:
-        description: User is not registered
     """
 
-    data = request.get_json()
+    data = request.get_json(silent=True)
 
     if not data:
 
         return jsonify({
-
             "success": False,
-
-            "message":
-                "Request body is required"
-
+            "message": "Request body is required"
         }), 400
 
     email = data.get(
@@ -913,12 +751,8 @@ def login():
     if not email or not password:
 
         return jsonify({
-
             "success": False,
-
-            "message":
-                "Email and password are required"
-
+            "message": "Email and password are required"
         }), 400
 
     conn = get_db()
@@ -934,10 +768,6 @@ def login():
 
     conn.close()
 
-    # =====================================================
-    # NOT REGISTERED
-    # =====================================================
-
     if not user:
 
         return jsonify({
@@ -950,10 +780,6 @@ def login():
                 "Please register first. This email is not registered."
 
         }), 404
-
-    # =====================================================
-    # WRONG PASSWORD
-    # =====================================================
 
     if not check_password_hash(
         user["password"],
@@ -971,19 +797,11 @@ def login():
 
         }), 401
 
-    # =====================================================
-    # CREATE SESSION
-    # =====================================================
-
     session["user_id"] = user["id"]
 
     session["user_name"] = user["name"]
 
     session["user_email"] = user["email"]
-
-    # =====================================================
-    # LOGIN SUCCESS
-    # =====================================================
 
     return jsonify({
 
@@ -1018,19 +836,9 @@ def get_current_user():
     ---
     tags:
       - Authentication
-
-    responses:
-
-      200:
-        description: Current user information
-
-      401:
-        description: User is not logged in
     """
 
-    user_id = session.get(
-        "user_id"
-    )
+    user_id = session.get("user_id")
 
     if not user_id:
 
@@ -1073,14 +881,9 @@ def get_current_user():
 
 @app.route("/logout", methods=["GET"])
 def logout_page():
-    """
-    Logout user and redirect to login page
-    """
 
-    # Clear complete login session
     session.clear()
 
-    # Redirect directly to login page
     return redirect("/login")
 
 
@@ -1090,42 +893,12 @@ def logout_page():
 
 @app.route("/api/logout", methods=["GET", "POST"])
 def logout():
-    """
-    Logout current user
-    ---
-    tags:
-      - Authentication
 
-    responses:
-
-      200:
-        description: Logout successful
-    """
-
-    # Clear complete login session
     session.clear()
-
-    # =====================================================
-    # GET REQUEST
-    # =====================================================
-    #
-    # If logout is opened directly as:
-    #
-    # /api/logout
-    #
-    # then send user to login page.
-    # =====================================================
 
     if request.method == "GET":
 
         return redirect("/login")
-
-    # =====================================================
-    # POST REQUEST
-    # =====================================================
-    #
-    # API clients / JavaScript receive JSON.
-    # =====================================================
 
     return jsonify({
 
@@ -1151,50 +924,9 @@ def forgot_password():
     ---
     tags:
       - Authentication
-
-    parameters:
-
-      - in: body
-        name: body
-        required: true
-        schema:
-          type: object
-          required:
-            - email
-            - new_password
-            - confirm_password
-
-          properties:
-
-            email:
-              type: string
-              example: john@gmail.com
-
-            new_password:
-              type: string
-              example: 123456
-
-            confirm_password:
-              type: string
-              example: 123456
-
-    responses:
-
-      200:
-        description: Password reset successful
-
-      400:
-        description: Invalid request
-
-      404:
-        description: Email not registered
     """
 
     try:
-
-        # =====================================================
-        # GET DATA
-        # =====================================================
 
         data = request.get_json(
             silent=True
@@ -1232,10 +964,6 @@ def forgot_password():
             )
         )
 
-        # =====================================================
-        # VALIDATION
-        # =====================================================
-
         if not email:
 
             return jsonify({
@@ -1269,10 +997,6 @@ def forgot_password():
 
             }), 400
 
-        # =====================================================
-        # PASSWORD LENGTH
-        # =====================================================
-
         if len(new_password) < 6:
 
             return jsonify({
@@ -1284,10 +1008,6 @@ def forgot_password():
 
             }), 400
 
-        # =====================================================
-        # PASSWORD MATCH
-        # =====================================================
-
         if new_password != confirm_password:
 
             return jsonify({
@@ -1298,10 +1018,6 @@ def forgot_password():
                     "Passwords do not match"
 
             }), 400
-
-        # =====================================================
-        # DATABASE
-        # =====================================================
 
         conn = get_db()
 
@@ -1318,10 +1034,6 @@ def forgot_password():
             (email,)
         ).fetchone()
 
-        # =====================================================
-        # EMAIL NOT FOUND
-        # =====================================================
-
         if user is None:
 
             conn.close()
@@ -1335,17 +1047,9 @@ def forgot_password():
 
             }), 404
 
-        # =====================================================
-        # HASH NEW PASSWORD
-        # =====================================================
-
         hashed_password = generate_password_hash(
             new_password
         )
-
-        # =====================================================
-        # UPDATE PASSWORD
-        # =====================================================
 
         conn.execute(
             """
@@ -1362,10 +1066,6 @@ def forgot_password():
         conn.commit()
 
         conn.close()
-
-        # =====================================================
-        # SUCCESS
-        # =====================================================
 
         return jsonify({
 
@@ -1399,17 +1099,6 @@ def forgot_password():
 
 @app.route("/api/flowers", methods=["GET"])
 def get_flowers():
-    """
-    Get all flowers
-    ---
-    tags:
-      - Flowers
-
-    responses:
-
-      200:
-        description: List of all flowers
-    """
 
     conn = get_db()
 
@@ -1469,33 +1158,8 @@ def get_flowers():
 # GET SINGLE FLOWER
 # =========================================================
 
-@app.route(
-    "/api/flowers/<int:flower_id>",
-    methods=["GET"]
-)
+@app.route("/api/flowers/<int:flower_id>", methods=["GET"])
 def get_flower(flower_id):
-    """
-    Get a single flower
-    ---
-    tags:
-      - Flowers
-
-    parameters:
-
-      - name: flower_id
-        in: path
-        required: true
-        type: integer
-        example: 1
-
-    responses:
-
-      200:
-        description: Flower found
-
-      404:
-        description: Flower not found
-    """
 
     conn = get_db()
 
@@ -1559,46 +1223,8 @@ def get_flower(flower_id):
 
 @app.route("/api/cart", methods=["POST"])
 def add_to_cart():
-    """
-    Add flower to cart
-    ---
-    tags:
-      - Cart
 
-    parameters:
-
-      - in: body
-        name: body
-        required: true
-        schema:
-          type: object
-          required:
-            - user_id
-            - flower_id
-          properties:
-            user_id:
-              type: integer
-              example: 1
-            flower_id:
-              type: integer
-              example: 2
-            quantity:
-              type: integer
-              example: 1
-
-    responses:
-
-      200:
-        description: Flower added to cart
-
-      400:
-        description: Invalid request
-
-      404:
-        description: User or flower not found
-    """
-
-    data = request.get_json()
+    data = request.get_json(silent=True)
 
     if not data:
 
@@ -1611,13 +1237,9 @@ def add_to_cart():
 
         }), 400
 
-    user_id = data.get(
-        "user_id"
-    )
+    user_id = data.get("user_id")
 
-    flower_id = data.get(
-        "flower_id"
-    )
+    flower_id = data.get("flower_id")
 
     quantity = data.get(
         "quantity",
@@ -1663,10 +1285,6 @@ def add_to_cart():
 
     conn = get_db()
 
-    # =====================================================
-    # CHECK USER
-    # =====================================================
-
     user = conn.execute(
         """
         SELECT id
@@ -1688,10 +1306,6 @@ def add_to_cart():
                 "User not found"
 
         }), 404
-
-    # =====================================================
-    # CHECK FLOWER
-    # =====================================================
 
     flower = conn.execute(
         """
@@ -1728,10 +1342,6 @@ def add_to_cart():
 
         }), 400
 
-    # =====================================================
-    # CHECK EXISTING CART ITEM
-    # =====================================================
-
     existing = conn.execute(
         """
         SELECT *
@@ -1746,10 +1356,6 @@ def add_to_cart():
     ).fetchone()
 
     if existing:
-
-        # =================================================
-        # PREVIOUSLY ORDERED
-        # =================================================
 
         if existing["status"] == "Ordered":
 
@@ -1836,30 +1442,8 @@ def add_to_cart():
 # GET USER CART
 # =========================================================
 
-@app.route(
-    "/api/cart/<int:user_id>",
-    methods=["GET"]
-)
+@app.route("/api/cart/<int:user_id>", methods=["GET"])
 def get_cart(user_id):
-    """
-    Get user's complete cart
-    ---
-    tags:
-      - Cart
-
-    parameters:
-
-      - name: user_id
-        in: path
-        required: true
-        type: integer
-        example: 1
-
-    responses:
-
-      200:
-        description: Cart fetched successfully
-    """
 
     conn = get_db()
 
@@ -1997,50 +1581,10 @@ def get_cart(user_id):
 # UPDATE CART QUANTITY
 # =========================================================
 
-@app.route(
-    "/api/cart/<int:cart_id>",
-    methods=["PUT"]
-)
+@app.route("/api/cart/<int:cart_id>", methods=["PUT"])
 def update_cart_quantity(cart_id):
-    """
-    Update cart quantity
-    ---
-    tags:
-      - Cart
 
-    parameters:
-
-      - name: cart_id
-        in: path
-        required: true
-        type: integer
-        example: 1
-
-      - in: body
-        name: body
-        required: true
-        schema:
-          type: object
-          required:
-            - quantity
-          properties:
-            quantity:
-              type: integer
-              example: 3
-
-    responses:
-
-      200:
-        description: Quantity updated
-
-      400:
-        description: Invalid quantity or ordered item
-
-      404:
-        description: Cart item not found
-    """
-
-    data = request.get_json()
+    data = request.get_json(silent=True)
 
     if not data:
 
@@ -2112,10 +1656,6 @@ def update_cart_quantity(cart_id):
 
         }), 404
 
-    # =====================================================
-    # ORDERED ITEM CANNOT CHANGE
-    # =====================================================
-
     if item["status"] == "Ordered":
 
         conn.close()
@@ -2172,33 +1712,8 @@ def update_cart_quantity(cart_id):
 # DELETE SINGLE CART ITEM
 # =========================================================
 
-@app.route(
-    "/api/cart/<int:cart_id>",
-    methods=["DELETE"]
-)
+@app.route("/api/cart/<int:cart_id>", methods=["DELETE"])
 def remove_cart_item(cart_id):
-    """
-    Remove one cart item
-    ---
-    tags:
-      - Cart
-
-    parameters:
-
-      - name: cart_id
-        in: path
-        required: true
-        type: integer
-        example: 1
-
-    responses:
-
-      200:
-        description: Cart item removed
-
-      404:
-        description: Cart item not found
-    """
 
     conn = get_db()
 
@@ -2255,25 +1770,6 @@ def remove_cart_item(cart_id):
     methods=["DELETE"]
 )
 def clear_user_cart(user_id):
-    """
-    Remove all cart items for a user
-    ---
-    tags:
-      - Cart
-
-    parameters:
-
-      - name: user_id
-        in: path
-        required: true
-        type: integer
-        example: 1
-
-    responses:
-
-      200:
-        description: Cart cleared
-    """
 
     conn = get_db()
 
@@ -2303,76 +1799,10 @@ def clear_user_cart(user_id):
 # CREATE ORDER / CHECKOUT
 # =========================================================
 
-@app.route(
-    "/api/orders",
-    methods=["POST"]
-)
+@app.route("/api/orders", methods=["POST"])
 def create_order():
-    """
-    Create a new order from selected cart items
-    ---
-    tags:
-      - Orders
 
-    parameters:
-
-      - in: body
-        name: body
-        required: true
-        schema:
-          type: object
-
-          required:
-            - user_id
-            - customer_name
-            - phone
-            - address
-            - payment
-            - cart_ids
-
-          properties:
-
-            user_id:
-              type: integer
-              example: 1
-
-            customer_name:
-              type: string
-              example: John Doe
-
-            phone:
-              type: string
-              example: 9876543210
-
-            address:
-              type: string
-              example: Hyderabad, Telangana
-
-            payment:
-              type: string
-              example: Cash on Delivery
-
-            cart_ids:
-              type: array
-              items:
-                type: integer
-              example:
-                - 1
-                - 2
-
-    responses:
-
-      201:
-        description: Order created successfully
-
-      400:
-        description: Invalid checkout request
-
-      404:
-        description: User not found
-    """
-
-    data = request.get_json()
+    data = request.get_json(silent=True)
 
     if not data:
 
@@ -2385,9 +1815,7 @@ def create_order():
 
         }), 400
 
-    user_id = data.get(
-        "user_id"
-    )
+    user_id = data.get("user_id")
 
     customer_name = data.get(
         "customer_name",
@@ -2479,10 +1907,6 @@ def create_order():
 
     conn = get_db()
 
-    # =====================================================
-    # CHECK USER
-    # =====================================================
-
     user = conn.execute(
         """
         SELECT id
@@ -2504,10 +1928,6 @@ def create_order():
                 "User not found"
 
         }), 404
-
-    # =====================================================
-    # GET SELECTED CART ITEMS
-    # =====================================================
 
     placeholders = ",".join(
         ["?"] * len(cart_ids)
@@ -2555,10 +1975,6 @@ def create_order():
         params
     ).fetchall()
 
-    # =====================================================
-    # CHECK SELECTED ITEMS
-    # =====================================================
-
     if not cart_items:
 
         conn.close()
@@ -2571,10 +1987,6 @@ def create_order():
                 "Selected cart items are not available for checkout"
 
         }), 400
-
-    # =====================================================
-    # CHECK ALL CART IDS
-    # =====================================================
 
     found_ids = {
         item["cart_id"]
@@ -2604,10 +2016,6 @@ def create_order():
 
         }), 400
 
-    # =====================================================
-    # CHECK STOCK
-    # =====================================================
-
     for item in cart_items:
 
         if item["quantity"] > item["stock"]:
@@ -2623,10 +2031,6 @@ def create_order():
 
             }), 400
 
-    # =====================================================
-    # CALCULATE TOTAL
-    # =====================================================
-
     total = 0
 
     for item in cart_items:
@@ -2635,10 +2039,6 @@ def create_order():
             item["price"]
             * item["quantity"]
         )
-
-    # =====================================================
-    # CREATE ORDER
-    # =====================================================
 
     cursor = conn.execute(
         """
@@ -2666,10 +2066,6 @@ def create_order():
     )
 
     order_id = cursor.lastrowid
-
-    # =====================================================
-    # CREATE ORDER ITEMS
-    # =====================================================
 
     for item in cart_items:
 
@@ -2701,10 +2097,6 @@ def create_order():
             )
         )
 
-        # =================================================
-        # REDUCE STOCK
-        # =================================================
-
         conn.execute(
             """
             UPDATE flowers
@@ -2717,18 +2109,11 @@ def create_order():
             )
         )
 
-        # =================================================
-        # MARK CART ITEM AS ORDERED
-        # =================================================
-
         conn.execute(
             """
             UPDATE cart
-
             SET status = 'Ordered'
-
             WHERE id = ?
-
             AND user_id = ?
             """,
             (
@@ -2738,10 +2123,6 @@ def create_order():
         )
 
     conn.commit()
-
-    # =====================================================
-    # GET CREATED ORDER
-    # =====================================================
 
     order = conn.execute(
         """
@@ -2799,33 +2180,8 @@ def create_order():
 # GET USER ORDERS
 # =========================================================
 
-@app.route(
-    "/api/orders/<int:user_id>",
-    methods=["GET"]
-)
+@app.route("/api/orders/<int:user_id>", methods=["GET"])
 def get_user_orders(user_id):
-    """
-    Get orders of a user
-    ---
-    tags:
-      - Orders
-
-    parameters:
-
-      - name: user_id
-        in: path
-        required: true
-        type: integer
-        example: 1
-
-    responses:
-
-      200:
-        description: User orders
-
-      404:
-        description: User not found
-    """
 
     conn = get_db()
 
@@ -2954,22 +2310,8 @@ def get_user_orders(user_id):
 # GET ALL ORDERS
 # =========================================================
 
-@app.route(
-    "/api/orders",
-    methods=["GET"]
-)
+@app.route("/api/orders", methods=["GET"])
 def get_all_orders():
-    """
-    Get all orders
-    ---
-    tags:
-      - Orders
-
-    responses:
-
-      200:
-        description: All orders
-    """
 
     conn = get_db()
 
@@ -3079,28 +2421,6 @@ def get_all_orders():
     methods=["DELETE"]
 )
 def delete_order(order_id):
-    """
-    Delete an order
-    ---
-    tags:
-      - Orders
-
-    parameters:
-
-      - name: order_id
-        in: path
-        required: true
-        type: integer
-        example: 1
-
-    responses:
-
-      200:
-        description: Order deleted
-
-      404:
-        description: Order not found
-    """
 
     conn = get_db()
 
@@ -3126,10 +2446,6 @@ def delete_order(order_id):
 
         }), 404
 
-    # =====================================================
-    # DELETE ORDER ITEMS
-    # =====================================================
-
     conn.execute(
         """
         DELETE FROM order_items
@@ -3138,10 +2454,6 @@ def delete_order(order_id):
         (order_id,)
     )
 
-    # =====================================================
-    # DELETE ORDER
-    # =====================================================
-
     conn.execute(
         """
         DELETE FROM orders
@@ -3149,10 +2461,6 @@ def delete_order(order_id):
         """,
         (order_id,)
     )
-
-    # =====================================================
-    # CART ITEM IS NOT DELETED
-    # =====================================================
 
     conn.commit()
 
@@ -3177,17 +2485,6 @@ def delete_order(order_id):
     methods=["GET"]
 )
 def health_check():
-    """
-    Check backend health
-    ---
-    tags:
-      - System
-
-    responses:
-
-      200:
-        description: Backend is working
-    """
 
     return jsonify({
 
@@ -3252,6 +2549,10 @@ if __name__ == "__main__":
 
     print(
         "http://127.0.0.1:5000/register"
+    )
+
+    print(
+        "http://127.0.0.1:5000/forgot-password"
     )
 
     print(
