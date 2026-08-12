@@ -226,6 +226,7 @@
 
 </head>
 
+
 <body>
 
 <div class="register-container">
@@ -297,192 +298,229 @@
 
 </div>
 
+
 <script>
 
-    const registerForm =
-        document.getElementById("registerForm");
-
-    const registerButton =
-        document.getElementById("registerButton");
-
-    const message =
-        document.getElementById("message");
+const registerForm =
+    document.getElementById(
+        "registerForm"
+    );
 
 
-    registerForm.addEventListener(
-        "submit",
-        async function(event) {
-
-            event.preventDefault();
-
-
-            const name =
-                document
-                    .getElementById("name")
-                    .value
-                    .trim();
+const registerButton =
+    document.getElementById(
+        "registerButton"
+    );
 
 
-            const email =
-                document
-                    .getElementById("regEmail")
-                    .value
-                    .trim();
+const message =
+    document.getElementById(
+        "message"
+    );
 
 
-            const password =
-                document
-                    .getElementById("regPassword")
-                    .value;
+registerForm.addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
 
 
-            const confirmPassword =
-                document
-                    .getElementById("confirmPassword")
-                    .value;
+        const name =
+            document
+                .getElementById("name")
+                .value
+                .trim();
 
 
-            if (password !== confirmPassword) {
-
-                message.textContent =
-                    "Passwords do not match.";
-
-                message.style.color =
-                    "red";
-
-                return;
-            }
+        const email =
+            document
+                .getElementById("regEmail")
+                .value
+                .trim()
+                .toLowerCase();
 
 
-            if (password.length < 6) {
-
-                message.textContent =
-                    "Password must be at least 6 characters.";
-
-                message.style.color =
-                    "red";
-
-                return;
-            }
+        const password =
+            document
+                .getElementById("regPassword")
+                .value;
 
 
-            registerButton.disabled = true;
+        const confirmPassword =
+            document
+                .getElementById("confirmPassword")
+                .value;
+
+
+        if (!name) {
 
             message.textContent =
-                "Creating account...";
+                "Please enter your name.";
 
             message.style.color =
-                "#777";
+                "red";
+
+            return;
+
+        }
 
 
-            try {
+        if (!email) {
 
-                /*
-                 * IMPORTANT:
-                 * Do NOT use 127.0.0.1 here.
-                 *
-                 * Relative API URL works both:
-                 *
-                 * Local:
-                 * http://127.0.0.1:5000/api/register
-                 *
-                 * Render:
-                 * https://your-app.onrender.com/api/register
-                 */
+            message.textContent =
+                "Please enter your email.";
 
-                const response =
-                    await fetch(
-                        "/api/register",
-                        {
-                            method: "POST",
+            message.style.color =
+                "red";
 
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
+            return;
 
-                            body: JSON.stringify({
-
-                                name: name,
-
-                                email: email,
-
-                                password: password
-
-                            })
-                        }
-                    );
+        }
 
 
-                const data =
-                    await response.json();
+        if (password.length < 6) {
+
+            message.textContent =
+                "Password must be at least 6 characters.";
+
+            message.style.color =
+                "red";
+
+            return;
+
+        }
 
 
-                if (
-                    response.ok &&
-                    data.success
-                ) {
+        if (
+            password !==
+            confirmPassword
+        ) {
 
-                    message.textContent =
-                        "🌸 Registration successful! Redirecting to login...";
+            message.textContent =
+                "Passwords do not match.";
 
-                    message.style.color =
-                        "green";
+            message.style.color =
+                "red";
+
+            return;
+
+        }
 
 
-                    registerForm.reset();
+        registerButton.disabled = true;
+
+        message.textContent =
+            "Creating account...";
+
+        message.style.color =
+            "#777";
 
 
-                    setTimeout(
-                        function() {
+        try {
 
-                            window.location.href =
-                                "/login";
+            const response =
+                await fetch(
+                    "/api/register",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json"
 
                         },
-                        1200
-                    );
 
+                        body:
+                            JSON.stringify({
 
-                    return;
-                }
+                                name:
+                                    name,
 
+                                email:
+                                    email,
 
-                message.textContent =
-                    data.message ||
-                    "Registration failed.";
+                                password:
+                                    password
 
-                message.style.color =
-                    "#d63384";
+                            })
 
-
-                registerButton.disabled =
-                    false;
-
-            }
-
-            catch (error) {
-
-                console.error(
-                    "Registration Error:",
-                    error
+                    }
                 );
 
 
+            const data =
+                await response.json();
+
+
+            if (
+                response.ok &&
+                data.success
+            ) {
+
                 message.textContent =
-                    "Unable to connect to server.";
+                    "🌸 Registration successful! Redirecting to login...";
 
                 message.style.color =
-                    "red";
+                    "green";
 
 
-                registerButton.disabled =
-                    false;
+                registerForm.reset();
+
+
+                setTimeout(
+                    function() {
+
+                        window.location.href =
+                            "/login";
+
+                    },
+                    1200
+                );
+
+
+                return;
 
             }
 
+
+            message.textContent =
+                data.message ||
+                "Registration failed.";
+
+            message.style.color =
+                "#d63384";
+
+
+            registerButton.disabled =
+                false;
+
         }
-    );
+
+        catch (error) {
+
+            console.error(
+                "Registration Error:",
+                error
+            );
+
+
+            message.textContent =
+                "Unable to connect to server.";
+
+            message.style.color =
+                "red";
+
+
+            registerButton.disabled =
+                false;
+
+        }
+
+    }
+);
 
 </script>
 
